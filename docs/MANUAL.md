@@ -126,16 +126,40 @@ curl -O https://raw.githubusercontent.com/knew-inventai/agentkit-skills/main/TOO
 | MCP | `knew-inventai/agentkit-mcp` |
 | Plugin | `knew-inventai/agentkit-plugins` |
 
-每個工具需建立一個獨立目錄，結構如下：
+每個工具需在對應 repo 中建立一個獨立目錄，各類型結構如下：
 
+**Skill**（`knew-inventai/agentkit-skills`）
 ```
-your-tool-name/
-├── plugin.json       # 必填：manifest（所有類型都需要）
-├── SKILL.md          # Skill 的主體內容
-├── PROMPT.md         # Prompt 的主體內容
-├── mcp-config.json   # MCP Server 的主體內容
-└── README.md         # 選填：詳細說明文件
+your-skill-name/
+├── plugin.json    # 必填：manifest
+├── SKILL.md       # 必填：AI 行為指令與工作流程
+└── README.md      # 選填：使用說明
 ```
+
+**Prompt**（`knew-inventai/agentkit-prompts`）
+```
+your-prompt-name/
+├── plugin.json    # 必填：manifest
+├── PROMPT.md      # 必填：可重用的 prompt 模板內容
+└── README.md      # 選填：使用說明
+```
+
+**MCP Server**（`knew-inventai/agentkit-mcp`）
+```
+your-mcp-name/
+├── plugin.json       # 必填：manifest
+├── mcp-config.json   # 必填：MCP server 設定（mcpServers 格式）
+└── README.md         # 選填：設定說明、token 取得方式
+```
+
+**Plugin**（`knew-inventai/agentkit-plugins`）
+```
+your-plugin-name/
+├── plugin.json    # 必填：manifest + slash commands 定義
+└── README.md      # 選填：指令說明與使用範例
+```
+
+> 提示：不確定怎麼產出這些檔案？可以安裝 [`package-creator`](?type=skill&name=package-creator) Skill，讓 AI 幫你一步步產出正確的格式。
 
 ---
 
