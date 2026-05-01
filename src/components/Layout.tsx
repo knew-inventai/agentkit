@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useDarkMode } from '../hooks/useDarkMode'
+import GitHubStarButton from './GitHubStarButton'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { auth, login, logout } = useAuth()
@@ -35,6 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Link to="/search" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">搜尋</Link>
             <Link to="/docs" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">使用手冊</Link>
             <div className="flex items-center gap-3">
+              <GitHubStarButton />
               {/* 暗黑模式切換 */}
               <button
                 onClick={toggle}
