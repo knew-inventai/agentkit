@@ -9,7 +9,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { isDark, toggle } = useDarkMode()
 
   // 未登入時顯示登入頁面
-  if (!auth.token) {
+  // 注意：dev mode 時 token=null 但 username='dev-user'，故用 && 判斷
+  if (!auth.token && !auth.username) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-10 shadow-sm text-center max-w-sm w-full">
