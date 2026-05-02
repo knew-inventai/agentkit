@@ -24,8 +24,7 @@ export default function DetailPage() {
     error,
   } = usePackageDetail(type as PackageType, name!, auth.token ?? undefined)
 
-  const [updatePrUrl, setUpdatePrUrl] = useState<string | null>(null)
-  void setUpdatePrUrl // wired in Idea 3
+  const [updatePrUrl, _setUpdatePrUrl] = useState<string | null>(null)
 
   const handleLike = async () => {
     if (!auth.token || !type || !name) return
