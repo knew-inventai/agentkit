@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createGitHubClient, updatePackageFiles } from '../services/github'
 import type { PackageManifest, PackageType } from '../types'
+import VersionInput from './VersionInput'
 
 interface Props {
   type: PackageType
@@ -16,15 +17,6 @@ interface Props {
 const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300'
 const inputClass =
   'mt-1 w-full rounded border px-3 py-2 text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
-
-function isNewerVersion(oldVer: string, newVer: string): boolean {
-  const parse = (v: string) => v.split('.').map(Number)
-  const [oa, ob, oc] = parse(oldVer)
-  const [na, nb, nc] = parse(newVer)
-  if (na !== oa) return na > oa
-  if (nb !== ob) return nb > ob
-  return nc > oc
-}
 
 export default function UpdatePackageModal({
   type,
@@ -47,17 +39,8 @@ export default function UpdatePackageModal({
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const versionValid =
-    /^\d+\.\d+\.\d+$/.test(form.version) &&
-    isNewerVersion(manifest.version, form.version)
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!versionValid) {
-      setErrorMsg(`新版本 (${form.version}) 必須大於現有版本 (${manifest.version})`)
-      setStatus('error')
-      return
-    }
     setStatus('submitting')
     setErrorMsg('')
     try {
@@ -116,20 +99,14 @@ export default function UpdatePackageModal({
               <input value={name} disabled className={`${inputClass} opacity-50 cursor-not-allowed`} />
             </div>
             <div>
-              <label className={labelClass}>
-                新版本{' '}
-                {form.version !== manifest.version && (
-                  <span className={`text-xs ${versionValid ? 'text-green-600' : 'text-red-500'}`}>
-                    {versionValid ? `✓ ${manifest.version} → ${form.version}` : '必須大於現有版本'}
-                  </span>
-                )}
-              </label>
-              <input
-                required
-                value={form.version}
-                onChange={(e) => setForm({ ...form, version: e.target.value })}
-                className={inputClass}
-              />
+              <label className={labelClass}>新版本</label>
+              <div className="mt-1">
+                <VersionInput
+                  value={form.version}
+                  onChange={(v) => setForm({ ...form, version: v })}
+                  min={manifest.version}
+                />
+              </div>
             </div>
           </div>
 
@@ -194,7 +171,7 @@ export default function UpdatePackageModal({
             </button>
             <button
               type="submit"
-              disabled={status === 'submitting' || !versionValid}
+              disabled={status === 'submitting' || form.version === manifest.version}
               className="flex-1 rounded-md bg-blue-600 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {status === 'submitting' ? '建立 PR 中...' : '送出更新（建立 Pull Request）'}

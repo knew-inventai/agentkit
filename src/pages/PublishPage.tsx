@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { createGitHubClient } from '../services/github'
 import Layout from '../components/Layout'
+import VersionInput from '../components/VersionInput'
 import type { PackageType } from '../types'
 
 const TYPES: PackageType[] = ['skill', 'prompt', 'mcp', 'plugin']
@@ -166,12 +167,12 @@ export default function PublishPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>版本</label>
-              <input
-                required
-                value={form.version}
-                onChange={(e) => setForm({ ...form, version: e.target.value })}
-                className={inputClass}
-              />
+              <div className="mt-1">
+                <VersionInput
+                  value={form.version}
+                  onChange={(v) => setForm({ ...form, version: v })}
+                />
+              </div>
             </div>
             <div>
               <label className={labelClass}>標籤（逗號分隔）</label>
