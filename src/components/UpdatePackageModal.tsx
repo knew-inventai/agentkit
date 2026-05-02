@@ -143,13 +143,11 @@ export default function UpdatePackageModal({
             </div>
           </div>
 
-          {type === 'plugin' && (
-            <DependencyPicker
-              value={form.dependencies}
-              onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
-              token={token}
-            />
-          )}
+          <DependencyPicker
+            value={form.dependencies}
+            onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
+            token={token}
+          />
 
           <div>
             <label className={labelClass}>主體內容</label>

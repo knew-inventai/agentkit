@@ -89,7 +89,7 @@ export default function InstallPanel({ type, name, version, dependencies = [], t
       )}
 
       {/* 依賴工具安裝指令 */}
-      {type === 'plugin' && dependencies.length > 0 && (
+      {dependencies.length > 0 && (
         <div className="mb-4">
           <p className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             步驟 1 — 先安裝依賴工具

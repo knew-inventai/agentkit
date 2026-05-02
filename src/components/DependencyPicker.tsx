@@ -50,7 +50,6 @@ export default function DependencyPicker({ value, onChange, token }: Props) {
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
         依賴工具
-        <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">（僅 Plugin 可設定）</span>
       </label>
 
       {/* Selected tags */}

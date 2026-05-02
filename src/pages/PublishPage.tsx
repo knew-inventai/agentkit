@@ -85,9 +85,7 @@ export default function PublishPage() {
           type: form.type,
           tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
           compatible: form.compatible.split(',').map((c) => c.trim()).filter(Boolean),
-          ...(form.type === 'plugin' && form.dependencies.length > 0
-            ? { dependencies: form.dependencies }
-            : {}),
+          ...(form.dependencies.length > 0 ? { dependencies: form.dependencies } : {}),
         },
       }
 
@@ -189,13 +187,11 @@ export default function PublishPage() {
             />
           </div>
           </div>
-          {form.type === 'plugin' && (
-            <DependencyPicker
-              value={form.dependencies}
-              onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
-              token={auth.token ?? undefined}
-            />
-          )}
+          <DependencyPicker
+            value={form.dependencies}
+            onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
+            token={auth.token ?? undefined}
+          />
           <div>
             <label className={labelClass}>
               主體內容（{FILE_NAMES[form.type]}）

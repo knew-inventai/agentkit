@@ -10,7 +10,7 @@ export interface PackageManifest {
     type: PackageType
     tags: string[]
     compatible: string[]
-    dependencies?: string[]   // plugin only
+    dependencies?: string[]
   }
 }
 
@@ -26,7 +26,7 @@ export interface Package {
   license: string
   updatedAt: string       // ISO date string
   repoPath: string        // GitHub raw URL base
-  dependencies?: string[] // ["skill/code-reviewer@1.0.0", ...] — plugin only
+  dependencies?: string[]   // ["skill/code-reviewer@1.0.0", ...]
 }
 
 export interface PackageStats {

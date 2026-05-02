@@ -269,7 +269,7 @@ export async function updatePackageFiles(
       type: payload.type,
       tags: payload.tags,
       compatible: payload.compatible,
-      ...(payload.type === 'plugin' && payload.dependencies && payload.dependencies.length > 0
+      ...(payload.dependencies && payload.dependencies.length > 0
         ? { dependencies: payload.dependencies }
         : {}),
     },
