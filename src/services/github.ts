@@ -210,6 +210,7 @@ export interface UpdatePackagePayload {
   content: string
   readme: string
   authorName: string
+  authorGithub?: string
 }
 
 /** Fetch a file's blob SHA (needed for updating existing files via GitHub API) */
@@ -223,8 +224,11 @@ async function getFileSha(
   try {
     const { data } = await octokit.repos.getContent({ owner, repo, path, ref: branch })
     if ('sha' in data) return data.sha
-  } catch {
-    // file doesn't exist yet
+  } catch (e: unknown) {
+    // only treat 404 as "file doesn't exist"; re-throw other errors
+    if (e instanceof Error && 'status' in e && (e as { status: number }).status !== 404) {
+      throw e
+    }
   }
   return undefined
 }
@@ -258,7 +262,7 @@ export async function updatePackageFiles(
     name: payload.name,
     version: payload.newVersion,
     description: payload.description,
-    author: { name: payload.authorName },
+    author: { name: payload.authorName, ...(payload.authorGithub ? { github: payload.authorGithub } : {}) },
     license: 'MIT',
     _agentkit: {
       type: payload.type,

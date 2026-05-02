@@ -73,6 +73,7 @@ export default function UpdatePackageModal({
         content: form.content,
         readme: form.readme,
         authorName: manifest.author.name,
+        authorGithub: manifest.author.github,
       })
       onSuccess(prUrl)
     } catch (e: unknown) {
@@ -82,8 +83,14 @@ export default function UpdatePackageModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b p-4 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             更新 {name}
