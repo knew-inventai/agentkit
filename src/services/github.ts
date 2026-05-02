@@ -180,7 +180,7 @@ export async function fetchReadmeAtRef(
     if (!('content' in data)) return ''
     return decodeBase64(data.content)
   } catch {
-    return '此 package 尚無說明文件。'
+    return ''
   }
 }
 

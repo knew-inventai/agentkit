@@ -48,6 +48,7 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
   // Version switch: re-fetch manifest + readme at the selected tag
   useEffect(() => {
     if (selectedVersion === null) return
+    let cancelled = false
     const octokit = createGitHubClient(token)
     const ref = `${name}@${selectedVersion}`
     setIsLoading(true)
@@ -56,12 +57,15 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
       fetchReadmeAtRef(octokit, type, name, ref),
     ])
       .then(([m, r]) => {
-        setManifest(m)
-        setReadme(r)
+        if (!cancelled) {
+          setManifest(m)
+          setReadme(r)
+        }
       })
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false))
-  }, [selectedVersion]) // eslint-disable-line react-hooks/exhaustive-deps
+      .catch((e: Error) => { if (!cancelled) setError(e.message) })
+      .finally(() => { if (!cancelled) setIsLoading(false) })
+    return () => { cancelled = true }
+  }, [selectedVersion, type, name, token]) // proper deps; token/name/type changes reset selectedVersion via first effect
 
   return { manifest, readme, releases, selectedVersion, setSelectedVersion, stats, setStats, isLoading, error }
 }
