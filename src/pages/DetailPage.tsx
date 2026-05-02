@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { toggleLike, recordDownload } from '../services/api'
 import { getRawFileUrl } from '../services/github'
 import Layout from '../components/Layout'
+import UpdatePackageModal from '../components/UpdatePackageModal'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import InstallPanel from '../components/InstallPanel'
 import type { PackageType } from '../types'
@@ -24,7 +25,9 @@ export default function DetailPage() {
     error,
   } = usePackageDetail(type as PackageType, name!, auth.token ?? undefined)
 
-  const [updatePrUrl, _setUpdatePrUrl] = useState<string | null>(null)
+  const [updatePrUrl, setUpdatePrUrl] = useState<string | null>(null)
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
+  const [bodyContent, setBodyContent] = useState<string | null>(null)
 
   const handleLike = async () => {
     if (!auth.token || !type || !name) return
@@ -43,6 +46,15 @@ export default function DetailPage() {
     await recordDownload(auth.token, type, name)
     setStats((prev) => ({ ...prev, downloads: prev.downloads + 1 }))
     window.open(getRawFileUrl(type as PackageType, name), '_blank')
+  }
+
+  const handleOpenUpdate = async () => {
+    if (!bodyContent) {
+      const url = getRawFileUrl(type as PackageType, name!)
+      const text = await fetch(url).then((r) => r.text())
+      setBodyContent(text)
+    }
+    setShowUpdateModal(true)
   }
 
   if (isLoading) return <Layout><p className="text-gray-400 dark:text-gray-500">載入中...</p></Layout>
@@ -110,7 +122,7 @@ export default function DetailPage() {
 
           {isAuthor && (
             <button
-              onClick={() => {/* TODO Idea 3 */}}
+              onClick={handleOpenUpdate}
               className="w-full rounded-md border border-blue-600 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
             >
               更新此工具
@@ -201,6 +213,21 @@ export default function DetailPage() {
           )}
         </div>
       </div>
+      {showUpdateModal && manifest && bodyContent !== null && (
+        <UpdatePackageModal
+          type={type as PackageType}
+          name={name!}
+          manifest={manifest}
+          currentContent={bodyContent}
+          currentReadme={readme}
+          token={auth.token!}
+          onClose={() => setShowUpdateModal(false)}
+          onSuccess={(url) => {
+            setUpdatePrUrl(url)
+            setShowUpdateModal(false)
+          }}
+        />
+      )}
     </Layout>
   )
 }

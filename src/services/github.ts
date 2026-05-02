@@ -198,3 +198,104 @@ export function getRawFileUrlAtTag(type: PackageType, name: string, version: str
   const tag = `${name}@${version}`
   return `https://raw.githubusercontent.com/${ORG}/${repo}/${tag}/${name}/${fileName[type]}`
 }
+
+export interface UpdatePackagePayload {
+  type: PackageType
+  name: string
+  oldVersion: string
+  newVersion: string
+  description: string
+  tags: string[]
+  compatible: string[]
+  content: string
+  readme: string
+  authorName: string
+}
+
+/** Fetch a file's blob SHA (needed for updating existing files via GitHub API) */
+async function getFileSha(
+  octokit: Octokit,
+  owner: string,
+  repo: string,
+  path: string,
+  branch: string,
+): Promise<string | undefined> {
+  try {
+    const { data } = await octokit.repos.getContent({ owner, repo, path, ref: branch })
+    if ('sha' in data) return data.sha
+  } catch {
+    // file doesn't exist yet
+  }
+  return undefined
+}
+
+/** Create a PR that updates an existing package's files */
+export async function updatePackageFiles(
+  octokit: Octokit,
+  payload: UpdatePackagePayload,
+): Promise<string> {
+  const org = ORG
+  const repo = REPOS[payload.type]
+  const branch = `update/${payload.name}-${Date.now()}`
+  const mainFileName: Record<PackageType, string> = {
+    skill: 'SKILL.md',
+    prompt: 'PROMPT.md',
+    mcp: 'mcp-config.json',
+    plugin: 'plugin.json',
+  }
+
+  const { data: ref } = await octokit.git.getRef({ owner: org, repo, ref: 'heads/main' })
+  const baseSha = ref.object.sha
+
+  await octokit.git.createRef({
+    owner: org,
+    repo,
+    ref: `refs/heads/${branch}`,
+    sha: baseSha,
+  })
+
+  const manifest = {
+    name: payload.name,
+    version: payload.newVersion,
+    description: payload.description,
+    author: { name: payload.authorName },
+    license: 'MIT',
+    _agentkit: {
+      type: payload.type,
+      tags: payload.tags,
+      compatible: payload.compatible,
+    },
+  }
+
+  const filesToUpdate = [
+    { path: `${payload.name}/plugin.json`, content: JSON.stringify(manifest, null, 2) },
+    { path: `${payload.name}/${mainFileName[payload.type]}`, content: payload.content },
+    ...(payload.readme
+      ? [{ path: `${payload.name}/README.md`, content: payload.readme }]
+      : []),
+  ]
+
+  for (const file of filesToUpdate) {
+    const sha = await getFileSha(octokit, org, repo, file.path, branch)
+    await octokit.repos.createOrUpdateFileContents({
+      owner: org,
+      repo,
+      path: file.path,
+      message: `fix: update ${payload.name} v${payload.oldVersion} → v${payload.newVersion}`,
+      content: btoa(unescape(encodeURIComponent(file.content))),
+      branch,
+      ...(sha ? { sha } : {}),
+    })
+  }
+
+  const { data: pr } = await octokit.pulls.create({
+    owner: org,
+    repo,
+    title: `fix: update ${payload.name} v${payload.oldVersion} → v${payload.newVersion}`,
+    head: branch,
+    base: 'main',
+    body: `## ${payload.name}\n\n${payload.description}\n\n**類型：** ${payload.type}\n**版本：** ${payload.oldVersion} → ${payload.newVersion}\n**標籤：** ${payload.tags.join(', ')}`,
+  })
+
+  return pr.html_url
+}
