@@ -143,3 +143,58 @@ export function getRawFileUrl(type: PackageType, name: string): string {
   }
   return `https://raw.githubusercontent.com/${ORG}/${repo}/main/${name}/${fileName[type]}`
 }
+
+/** Fetch plugin.json from a specific git ref (tag format: "{name}@{version}") */
+export async function fetchManifestAtRef(
+  octokit: Octokit,
+  type: PackageType,
+  name: string,
+  ref: string,
+): Promise<PackageManifest> {
+  const repo = REPOS[type]
+  const { data } = await octokit.repos.getContent({
+    owner: ORG,
+    repo,
+    path: `${name}/plugin.json`,
+    ref,
+  })
+  if (!('content' in data)) throw new Error('not a file')
+  return JSON.parse(decodeBase64(data.content)) as PackageManifest
+}
+
+/** Fetch README.md from a specific git ref */
+export async function fetchReadmeAtRef(
+  octokit: Octokit,
+  type: PackageType,
+  name: string,
+  ref: string,
+): Promise<string> {
+  const repo = REPOS[type]
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: ORG,
+      repo,
+      path: `${name}/README.md`,
+      ref,
+    })
+    if (!('content' in data)) return ''
+    return decodeBase64(data.content)
+  } catch {
+    return '此 package 尚無說明文件。'
+  }
+}
+
+/** Get raw URL for the body file at a specific release tag.
+ *  Tag format: "{name}@{version}" e.g. "code-reviewer@1.0.0"
+ */
+export function getRawFileUrlAtTag(type: PackageType, name: string, version: string): string {
+  const repo = REPOS[type]
+  const fileName: Record<PackageType, string> = {
+    skill: 'SKILL.md',
+    prompt: 'PROMPT.md',
+    mcp: 'mcp-config.json',
+    plugin: 'plugin.json',
+  }
+  const tag = `${name}@${version}`
+  return `https://raw.githubusercontent.com/${ORG}/${repo}/${tag}/${name}/${fileName[type]}`
+}

@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
-import { createGitHubClient, fetchManifest, fetchReadme, fetchReleases } from '../services/github'
+import {
+  createGitHubClient,
+  fetchManifest,
+  fetchManifestAtRef,
+  fetchReadme,
+  fetchReadmeAtRef,
+  fetchReleases,
+} from '../services/github'
 import { fetchPackageStats } from '../services/api'
 import type { PackageManifest, PackageRelease, PackageStats, PackageType } from '../types'
 
@@ -7,13 +14,16 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
   const [manifest, setManifest] = useState<PackageManifest | null>(null)
   const [readme, setReadme] = useState('')
   const [releases, setReleases] = useState<PackageRelease[]>([])
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
   const [stats, setStats] = useState<PackageStats>({ downloads: 0, likes: 0, liked_by_me: false })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Initial load: fetch latest manifest + readme + releases + stats
   useEffect(() => {
     setIsLoading(true)
     setError(null)
+    setSelectedVersion(null)
     const octokit = createGitHubClient(token)
     const packageId = `${type}/${name}`
 
@@ -21,7 +31,9 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
       fetchManifest(octokit, type, name),
       fetchReadme(octokit, type, name),
       fetchReleases(octokit, type, name),
-      token ? fetchPackageStats(token, [packageId]) : Promise.resolve({} as Record<string, PackageStats>),
+      token
+        ? fetchPackageStats(token, [packageId])
+        : Promise.resolve({} as Record<string, PackageStats>),
     ])
       .then(([m, r, rel, s]) => {
         setManifest(m)
@@ -33,5 +45,23 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
       .finally(() => setIsLoading(false))
   }, [type, name, token])
 
-  return { manifest, readme, releases, stats, setStats, isLoading, error }
+  // Version switch: re-fetch manifest + readme at the selected tag
+  useEffect(() => {
+    if (selectedVersion === null) return
+    const octokit = createGitHubClient(token)
+    const ref = `${name}@${selectedVersion}`
+    setIsLoading(true)
+    Promise.all([
+      fetchManifestAtRef(octokit, type, name, ref),
+      fetchReadmeAtRef(octokit, type, name, ref),
+    ])
+      .then(([m, r]) => {
+        setManifest(m)
+        setReadme(r)
+      })
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setIsLoading(false))
+  }, [selectedVersion]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  return { manifest, readme, releases, selectedVersion, setSelectedVersion, stats, setStats, isLoading, error }
 }

@@ -1,5 +1,5 @@
 import type { InstallScope, InstallTool, PackageType } from '../types'
-import { getRawFileUrl } from '../services/github'
+import { getRawFileUrl, getRawFileUrlAtTag } from '../services/github'
 
 const ORG = import.meta.env.VITE_GITHUB_ORG
 
@@ -29,29 +29,34 @@ export function getInstallCommands(
   scope: InstallScope,
   type: PackageType,
   name: string,
+  version?: string,
 ): InstallCommand[] {
-  const rawUrl = getRawFileUrl(type, name)
+  const rawUrl = version
+    ? getRawFileUrlAtTag(type, name, version)
+    : getRawFileUrl(type, name)
 
   if (tool === 'claude-code') {
     const marketplaceRepo = `${ORG}/agentkit-${type}s`
-    return [
-      {
+    const commands: InstallCommand[] = []
+    if (!version) {
+      commands.push({
         title: '方式一：Claude Code Marketplace（推薦）',
         command: `/plugin marketplace add ${marketplaceRepo}\n/plugin install ${name}@agentkit-${type}s`,
         language: 'shell',
-      },
-      {
-        title: '方式二：curl 手動安裝',
-        command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${getInstallPath('claude-code', scope, name, type)}`,
-        language: 'shell',
-      },
-    ]
+      })
+    }
+    commands.push({
+      title: version ? `curl 安裝 v${version}` : '方式二：curl 手動安裝',
+      command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${getInstallPath('claude-code', scope, name, type)}`,
+      language: 'shell',
+    })
+    return commands
   }
 
   if (tool === 'cursor') {
     return [
       {
-        title: 'curl 安裝',
+        title: version ? `curl 安裝 v${version}` : 'curl 安裝',
         command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${getInstallPath('cursor', scope, name, type)}`,
         language: 'shell',
       },
@@ -60,7 +65,7 @@ export function getInstallCommands(
 
   const commands: InstallCommand[] = [
     {
-      title: '下載到本機',
+      title: version ? `下載 v${version} 到本機` : '下載到本機',
       command: `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.md`,
       language: 'shell',
     },
