@@ -47,3 +47,5 @@ export interface AuthState {
   username: string | null
   isLoading: boolean
 }
+
+export type SortKey = 'downloads' | 'likes' | 'updated'

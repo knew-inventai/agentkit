@@ -50,3 +50,52 @@ export async function recordDownload(
     headers: { Authorization: `Bearer ${token}` },
   })
 }
+
+// ─── Package listing (D1-backed) ──────────────────────────
+
+export interface PackageListItem {
+  id: string
+  type: string
+  name: string
+  version: string
+  description: string
+  tags: string[]
+  compatible: string[]
+  author: string
+  license: string
+  updatedAt: string
+  repoPath: string
+  downloads: number
+  likes: number
+  liked_by_me: boolean
+}
+
+export interface PackagesApiResponse {
+  packages: PackageListItem[]
+  total: number
+  offset: number
+  limit: number
+}
+
+export async function fetchPackages(opts: {
+  token?: string
+  type?: string
+  sort?: string
+  q?: string
+  offset?: number
+  limit?: number
+}): Promise<PackagesApiResponse> {
+  const params = new URLSearchParams()
+  if (opts.type)             params.set('type', opts.type)
+  if (opts.sort)             params.set('sort', opts.sort)
+  if (opts.q)                params.set('q', opts.q)
+  if (opts.offset != null)   params.set('offset', String(opts.offset))
+  if (opts.limit  != null)   params.set('limit',  String(opts.limit))
+
+  const headers: Record<string, string> = {}
+  if (opts.token) headers['Authorization'] = `Bearer ${opts.token}`
+
+  const res = await fetch(`${API_BASE}/packages?${params}`, { headers })
+  if (!res.ok) throw new Error(`fetchPackages failed: ${res.status}`)
+  return res.json() as Promise<PackagesApiResponse>
+}
