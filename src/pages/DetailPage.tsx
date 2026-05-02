@@ -1,14 +1,98 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import { usePackageDetail } from '../hooks/usePackageDetail'
 import { useAuth } from '../hooks/useAuth'
-import { toggleLike, recordDownload } from '../services/api'
+import { toggleLike, recordDownload, fetchPackageById } from '../services/api'
+import type { PackageListItem } from '../services/api'
 import { getRawFileUrl } from '../services/github'
 import Layout from '../components/Layout'
 import UpdatePackageModal from '../components/UpdatePackageModal'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import InstallPanel from '../components/InstallPanel'
+import { parseDependency } from '../types'
 import type { PackageType } from '../types'
+
+const TYPE_COLORS: Record<string, string> = {
+  skill: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  prompt: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  mcp: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  plugin: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+}
+
+function DependencyCards({ deps, token }: { deps: string[]; token?: string }) {
+  const parsed = deps.map(parseDependency).filter(Boolean) as NonNullable<ReturnType<typeof parseDependency>>[]
+  const [pkgs, setPkgs] = useState<Record<string, PackageListItem | null>>({})
+
+  useEffect(() => {
+    if (parsed.length === 0) return
+    parsed.forEach(({ type, name, id }) => {
+      fetchPackageById(type, name, token)
+        .then((pkg) => setPkgs((prev) => ({ ...prev, [id]: pkg })))
+        .catch(() => setPkgs((prev) => ({ ...prev, [id]: null })))
+    })
+  }, [deps, token]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (parsed.length === 0) return null
+
+  return (
+    <div className="mt-6">
+      <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+        此工具需要以下工具
+      </h3>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {parsed.map((dep) => {
+          if (!dep) return null
+          const pkg = pkgs[dep.id]
+          const loaded = dep.id in pkgs
+
+          if (!loaded) {
+            return (
+              <div key={dep.id} className="animate-pulse rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                <div className="h-3 w-24 rounded bg-gray-200 dark:bg-gray-700 mb-1" />
+                <div className="h-2 w-32 rounded bg-gray-100 dark:bg-gray-800" />
+              </div>
+            )
+          }
+
+          if (pkg === null) {
+            return (
+              <div
+                key={dep.id}
+                className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 opacity-50"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${TYPE_COLORS[dep.type] ?? ''}`}>
+                    {dep.type}
+                  </span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{dep.name}</span>
+                  <span className="text-xs text-gray-400">v{dep.version}</span>
+                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500">（工具不存在於索引）</p>
+              </div>
+            )
+          }
+
+          return (
+            <Link
+              key={dep.id}
+              to={`/${pkg.type}/${pkg.name}`}
+              className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${TYPE_COLORS[pkg.type] ?? ''}`}>
+                  {pkg.type}
+                </span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pkg.name}</span>
+                <span className="text-xs text-gray-400">v{dep.version}</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{pkg.description}</p>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 export default function DetailPage() {
   const { type, name } = useParams<{ type: string; name: string }>()
@@ -89,6 +173,14 @@ export default function DetailPage() {
             </div>
           </div>
           <MarkdownRenderer content={readme} />
+
+          {/* Dependency cards — plugin only */}
+          {manifest._agentkit?.dependencies && manifest._agentkit.dependencies.length > 0 && (
+            <DependencyCards
+              deps={manifest._agentkit.dependencies}
+              token={auth.token ?? undefined}
+            />
+          )}
         </div>
 
         <div className="space-y-4">
@@ -111,6 +203,8 @@ export default function DetailPage() {
             type={type as PackageType}
             name={name!}
             version={selectedVersion ?? undefined}
+            dependencies={manifest._agentkit?.dependencies}
+            token={auth.token ?? undefined}
           />
 
           <button

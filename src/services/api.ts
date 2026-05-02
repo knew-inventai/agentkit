@@ -68,6 +68,7 @@ export interface PackageListItem {
   downloads: number
   likes: number
   liked_by_me: boolean
+  dependencies: string[]
 }
 
 export interface PackagesApiResponse {
@@ -98,4 +99,21 @@ export async function fetchPackages(opts: {
   const res = await fetch(`${API_BASE}/packages?${params}`, { headers })
   if (!res.ok) throw new Error(`fetchPackages failed: ${res.status}`)
   return res.json() as Promise<PackagesApiResponse>
+}
+
+/**
+ * Fetch a single package by type + name from the D1 index.
+ * Used for resolving dependency cards and InstallPanel dep commands.
+ * Throws if not found (404) or network error.
+ */
+export async function fetchPackageById(
+  type: string,
+  name: string,
+  token?: string,
+): Promise<PackageListItem> {
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  const res = await fetch(`${API_BASE}/packages/${type}/${name}`, { headers })
+  if (!res.ok) throw new Error(`fetchPackageById ${type}/${name}: ${res.status}`)
+  return res.json() as Promise<PackageListItem>
 }

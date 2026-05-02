@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { createGitHubClient } from '../services/github'
 import Layout from '../components/Layout'
 import VersionInput from '../components/VersionInput'
+import DependencyPicker from '../components/DependencyPicker'
 import type { PackageType } from '../types'
 
 const TYPES: PackageType[] = ['skill', 'prompt', 'mcp', 'plugin']
@@ -35,6 +36,7 @@ export default function PublishPage() {
     compatible: 'claude',
     content: '',
     readme: '',
+    dependencies: [] as string[],
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -83,6 +85,9 @@ export default function PublishPage() {
           type: form.type,
           tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
           compatible: form.compatible.split(',').map((c) => c.trim()).filter(Boolean),
+          ...(form.type === 'plugin' && form.dependencies.length > 0
+            ? { dependencies: form.dependencies }
+            : {}),
         },
       }
 
@@ -174,16 +179,23 @@ export default function PublishPage() {
                 />
               </div>
             </div>
-            <div>
-              <label className={labelClass}>標籤（逗號分隔）</label>
-              <input
-                value={form.tags}
-                onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                className={inputClass}
-                placeholder="review, typescript"
-              />
-            </div>
+          <div>
+            <label className={labelClass}>標籤（逗號分隔）</label>
+            <input
+              value={form.tags}
+              onChange={(e) => setForm({ ...form, tags: e.target.value })}
+              className={inputClass}
+              placeholder="review, typescript"
+            />
           </div>
+          </div>
+          {form.type === 'plugin' && (
+            <DependencyPicker
+              value={form.dependencies}
+              onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
+              token={auth.token ?? undefined}
+            />
+          )}
           <div>
             <label className={labelClass}>
               主體內容（{FILE_NAMES[form.type]}）

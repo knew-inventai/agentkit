@@ -211,6 +211,7 @@ export interface UpdatePackagePayload {
   readme: string
   authorName: string
   authorGithub?: string
+  dependencies?: string[]   // plugin only — omit or [] means no dependencies
 }
 
 /** Fetch a file's blob SHA (needed for updating existing files via GitHub API) */
@@ -268,6 +269,9 @@ export async function updatePackageFiles(
       type: payload.type,
       tags: payload.tags,
       compatible: payload.compatible,
+      ...(payload.type === 'plugin' && payload.dependencies && payload.dependencies.length > 0
+        ? { dependencies: payload.dependencies }
+        : {}),
     },
   }
 

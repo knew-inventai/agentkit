@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createGitHubClient, updatePackageFiles } from '../services/github'
 import type { PackageManifest, PackageType } from '../types'
 import VersionInput from './VersionInput'
+import DependencyPicker from './DependencyPicker'
 
 interface Props {
   type: PackageType
@@ -35,6 +36,7 @@ export default function UpdatePackageModal({
     compatible: manifest._agentkit?.compatible.join(', ') ?? '',
     content: currentContent,
     readme: currentReadme,
+    dependencies: (manifest._agentkit as Record<string, unknown> & { dependencies?: string[] })?.dependencies ?? [] as string[],
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -57,6 +59,7 @@ export default function UpdatePackageModal({
         readme: form.readme,
         authorName: manifest.author.name,
         authorGithub: manifest.author.github,
+        dependencies: form.dependencies,
       })
       onSuccess(prUrl)
     } catch (e: unknown) {
@@ -139,6 +142,14 @@ export default function UpdatePackageModal({
               />
             </div>
           </div>
+
+          {type === 'plugin' && (
+            <DependencyPicker
+              value={form.dependencies}
+              onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
+              token={token}
+            />
+          )}
 
           <div>
             <label className={labelClass}>主體內容</label>
