@@ -11,14 +11,15 @@ const TOOLS: { id: InstallTool; label: string }[] = [
 interface Props {
   type: PackageType
   name: string
+  version?: string
 }
 
-export default function InstallPanel({ type, name }: Props) {
+export default function InstallPanel({ type, name, version }: Props) {
   const [tool, setTool] = useState<InstallTool>('claude-code')
   const [scope, setScope] = useState<InstallScope>('global')
   const [copied, setCopied] = useState<string | null>(null)
 
-  const commands = getInstallCommands(tool, scope, type, name)
+  const commands = getInstallCommands(tool, scope, type, name, version)
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
