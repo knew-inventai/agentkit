@@ -112,6 +112,10 @@ export default function DetailPage() {
   const [updatePrUrl, setUpdatePrUrl] = useState<string | null>(null)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [bodyContent, setBodyContent] = useState<string | null>(null)
+  const [showAllVersions, setShowAllVersions] = useState(false)
+
+  const VERSION_PREVIEW = 3
+  const visibleReleases = showAllVersions ? releases : releases.slice(0, VERSION_PREVIEW)
 
   const handleLike = async () => {
     if (!auth.token || !type || !name) return
@@ -236,7 +240,7 @@ export default function DetailPage() {
             <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">版本歷史</h3>
               <ul className="space-y-1">
-                {releases.map((r) => {
+                {visibleReleases.map((r) => {
                   const isSelected = selectedVersion === r.version
                   const isLatest = selectedVersion === null && r === releases[0]
                   const active = isSelected || isLatest
@@ -261,10 +265,20 @@ export default function DetailPage() {
                   )
                 })}
               </ul>
+              {releases.length > VERSION_PREVIEW && (
+                <button
+                  onClick={() => setShowAllVersions((v) => !v)}
+                  className="mt-2 w-full text-center text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showAllVersions
+                    ? '收起'
+                    : `顯示全部 ${releases.length} 個版本`}
+                </button>
+              )}
               {selectedVersion && (
                 <button
                   onClick={() => setSelectedVersion(null)}
-                  className="mt-2 w-full text-center text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="mt-1 w-full text-center text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   ← 切回最新版本
                 </button>
