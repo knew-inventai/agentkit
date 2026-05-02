@@ -4,7 +4,7 @@ export interface PackageManifest {
   name: string
   version: string
   description: string
-  author: { name: string; email?: string }
+  author: { name: string; email?: string; github?: string }
   license: string
   _agentkit: {
     type: PackageType
