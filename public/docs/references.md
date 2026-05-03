@@ -49,16 +49,14 @@
 
 ---
 
-## AgentKit 相關資源
+## AgentKit 套件集
 
 | 資源 | 說明 |
 |------|------|
-| [knew-inventai/agentkit](https://github.com/knew-inventai/agentkit) | 前端 React SPA 原始碼 |
-| [knew-inventai/agentkit-api](https://github.com/knew-inventai/agentkit-api) | Cloudflare Worker 原始碼 |
-| [knew-inventai/agentkit-skills](https://github.com/knew-inventai/agentkit-skills) | Skill 套件集 |
-| [knew-inventai/agentkit-agents](https://github.com/knew-inventai/agentkit-agents) | Agent 套件集 |
-| [knew-inventai/agentkit-mcp](https://github.com/knew-inventai/agentkit-mcp) | MCP Server 套件集 |
-| [knew-inventai/agentkit-plugins](https://github.com/knew-inventai/agentkit-plugins) | Plugin 套件集 |
+| [agentkit-skills](https://github.com/knew-inventai/agentkit-skills) | Skill 套件集 |
+| [agentkit-agents](https://github.com/knew-inventai/agentkit-agents) | Agent 套件集 |
+| [agentkit-mcp](https://github.com/knew-inventai/agentkit-mcp) | MCP Server 套件集 |
+| [agentkit-plugins](https://github.com/knew-inventai/agentkit-plugins) | Plugin 套件集 |
 
 ---
 
@@ -67,7 +65,4 @@
 | 資源 | 說明 |
 |------|------|
 | [Model Context Protocol](https://modelcontextprotocol.io/) | MCP 開放標準官網 |
-| [Agent Skills Open Standard](https://code.claude.com/docs/zh-TW/skills) | Skill 格式標準（Claude Code 實作） |
 | [Semantic Versioning](https://semver.org/lang/zh-TW/) | 套件版本號規範（MAJOR.MINOR.PATCH） |
-| [Cloudflare Workers D1](https://developers.cloudflare.com/d1/) | D1 serverless SQLite 文件 |
-| [Cloudflare Workers](https://developers.cloudflare.com/workers/) | Cloudflare Workers 文件 |
