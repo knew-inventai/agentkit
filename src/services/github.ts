@@ -10,7 +10,7 @@ function decodeBase64(b64: string): string {
 }
 const REPOS: Record<PackageType, string> = {
   skill: import.meta.env.VITE_REPO_SKILLS,
-  prompt: import.meta.env.VITE_REPO_PROMPTS,
+  agent: import.meta.env.VITE_REPO_AGENTS,
   mcp: import.meta.env.VITE_REPO_MCP,
   plugin: import.meta.env.VITE_REPO_PLUGINS,
 }
@@ -81,7 +81,7 @@ export async function fetchPackageList(
 
 /** 取得所有 category 的 packages */
 export async function fetchAllPackages(octokit: Octokit): Promise<Package[]> {
-  const types: PackageType[] = ['skill', 'prompt', 'mcp', 'plugin']
+  const types: PackageType[] = ['skill', 'agent', 'mcp', 'plugin']
   const results = await Promise.allSettled(
     types.map((type) => fetchPackageList(octokit, type)),
   )
@@ -137,7 +137,7 @@ export function getRawFileUrl(type: PackageType, name: string): string {
   const repo = REPOS[type]
   const fileName: Record<PackageType, string> = {
     skill: 'SKILL.md',
-    prompt: 'PROMPT.md',
+    agent: 'AGENT.md',
     mcp: 'mcp-config.json',
     plugin: 'plugin.json',
   }
@@ -191,7 +191,7 @@ export function getRawFileUrlAtTag(type: PackageType, name: string, version: str
   const repo = REPOS[type]
   const fileName: Record<PackageType, string> = {
     skill: 'SKILL.md',
-    prompt: 'PROMPT.md',
+    agent: 'AGENT.md',
     mcp: 'mcp-config.json',
     plugin: 'plugin.json',
   }
@@ -244,7 +244,7 @@ export async function updatePackageFiles(
   const branch = `update/${payload.name}-${Date.now()}`
   const mainFileName: Record<PackageType, string> = {
     skill: 'SKILL.md',
-    prompt: 'PROMPT.md',
+    agent: 'AGENT.md',
     mcp: 'mcp-config.json',
     plugin: 'plugin.json',
   }
