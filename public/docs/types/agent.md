@@ -60,3 +60,7 @@ curl -fsSL https://raw.githubusercontent.com/knew-inventai/agentkit-agents/main/
 ## 使用方式
 
 安裝後，Claude Code 會在適合的情境**自動**啟用對應的 Sub-Agent，無需手動呼叫。
+
+---
+
+> **參考文獻：** [Claude Code — Sub-agents](https://code.claude.com/docs/zh-TW/sub-agents) · [Claude Code — Subagent 詞彙](https://code.claude.com/docs/zh-TW/glossary#subagent) · [Codex — Subagents](https://developers.openai.com/codex/concepts/subagents) · [完整參考文獻列表](/docs?page=references)

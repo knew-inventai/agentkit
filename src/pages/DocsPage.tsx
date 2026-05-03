@@ -12,6 +12,8 @@ const DOCS_PAGES = [
   { id: 'publishing',      label: '發布套件',    file: 'docs/publishing.md' },
   { id: 'install',         label: '安裝套件',    file: 'docs/install.md' },
   { id: 'contributing',    label: '貢獻指南',    file: 'docs/contributing.md' },
+  { id: 'glossary',        label: '名詞解釋',    file: 'docs/glossary.md' },
+  { id: 'references',      label: '參考文獻',    file: 'docs/references.md' },
 ]
 
 export default function DocsPage() {

@@ -52,3 +52,7 @@ cp -r /tmp/agentkit-plugins/{name} ~/.claude/plugins/{name}
 ## 發布 Plugin
 
 Plugin 包含多個檔案，需透過 GitHub Pull Request 發布。前往 [發布頁面](/agentkit/#/publish)，選擇 Plugin 類型，即可看到詳細的 Fork & PR 流程說明。
+
+---
+
+> **參考文獻：** [Claude Code — Plugins](https://code.claude.com/docs/zh-TW/plugins) · [Codex — Plugins](https://developers.openai.com/codex/plugins) · [完整參考文獻列表](/docs?page=references)
