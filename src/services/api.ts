@@ -68,7 +68,6 @@ export interface PackageListItem {
   downloads: number
   likes: number
   liked_by_me: boolean
-  dependencies: string[]
 }
 
 export interface PackagesApiResponse {
