@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const REPO = 'knew-inventai/agentkit'
+const REPO = `${import.meta.env.VITE_GITHUB_ORG}/agentkit`
 
 export default function GitHubStarButton() {
   const [stars, setStars] = useState<number | null>(null)
