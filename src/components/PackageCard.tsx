@@ -3,7 +3,7 @@ import type { Package, PackageStats } from '../types'
 
 const TYPE_BADGE: Record<string, string> = {
   skill: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-  prompt: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+  agent: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
   mcp: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
   plugin: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
 }

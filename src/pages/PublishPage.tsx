@@ -4,19 +4,19 @@ import { useAuth } from '../hooks/useAuth'
 import { createGitHubClient } from '../services/github'
 import Layout from '../components/Layout'
 import VersionInput from '../components/VersionInput'
-import DependencyPicker from '../components/DependencyPicker'
 import type { PackageType } from '../types'
 
-const TYPES: PackageType[] = ['skill', 'prompt', 'mcp', 'plugin']
-const FILE_NAMES: Record<PackageType, string> = {
+const TYPES: PackageType[] = ['skill', 'agent', 'mcp', 'plugin']
+
+// FILE_NAMES: plugin has no single body file, use Partial
+const FILE_NAMES: Partial<Record<PackageType, string>> = {
   skill: 'SKILL.md',
-  prompt: 'PROMPT.md',
+  agent: 'AGENT.md',
   mcp: 'mcp-config.json',
-  plugin: 'plugin.json',
 }
 const REPOS: Record<PackageType, string> = {
   skill: import.meta.env.VITE_REPO_SKILLS,
-  prompt: import.meta.env.VITE_REPO_PROMPTS,
+  agent: import.meta.env.VITE_REPO_AGENTS,
   mcp: import.meta.env.VITE_REPO_MCP,
   plugin: import.meta.env.VITE_REPO_PLUGINS,
 }
@@ -36,7 +36,6 @@ export default function PublishPage() {
     compatible: 'claude',
     content: '',
     readme: '',
-    dependencies: [] as string[],
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -58,6 +57,8 @@ export default function PublishPage() {
     e.preventDefault()
     setStatus('submitting')
     setErrorMsg('')
+
+    if (form.type === 'plugin') return  // plugin uses GitHub PR flow
 
     try {
       const octokit = createGitHubClient(auth.token!)
@@ -85,7 +86,6 @@ export default function PublishPage() {
           type: form.type,
           tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
           compatible: form.compatible.split(',').map((c) => c.trim()).filter(Boolean),
-          ...(form.dependencies.length > 0 ? { dependencies: form.dependencies } : {}),
         },
       }
 
@@ -187,24 +187,47 @@ export default function PublishPage() {
             />
           </div>
           </div>
-          <DependencyPicker
-            value={form.dependencies}
-            onChange={(deps) => setForm((f) => ({ ...f, dependencies: deps }))}
-            token={auth.token ?? undefined}
-          />
-          <div>
-            <label className={labelClass}>
-              主體內容（{FILE_NAMES[form.type]}）
-            </label>
-            <textarea
-              required
-              rows={10}
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className={`${inputClass} font-mono`}
-              placeholder={`在此貼上 ${FILE_NAMES[form.type]} 內容...`}
-            />
-          </div>
+          {form.type === 'plugin' ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+              <p className="mb-3 text-sm font-medium text-amber-800 dark:text-amber-300">
+                Plugin 需透過 GitHub Pull Request 發布
+              </p>
+              <p className="mb-3 text-xs text-amber-700 dark:text-amber-400">
+                Plugin 包含多個檔案（commands/、hooks/、.mcp.json 等），需要在本機建立並測試後再提交。
+              </p>
+              <pre className="mb-3 rounded bg-amber-100 p-3 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 overflow-x-auto">
+{`your-plugin-name/
+├── plugin.json                 # AgentKit manifest
+├── .claude-plugin/
+│   └── plugin.json             # Claude Code native manifest
+├── commands/
+│   └── my-command.md           # slash commands
+└── README.md`}
+              </pre>
+              <a
+                href={`https://github.com/${import.meta.env.VITE_GITHUB_ORG}/agentkit-plugins/fork`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-700"
+              >
+                前往 GitHub Fork &amp; 建立 PR →
+              </a>
+            </div>
+          ) : (
+            <div>
+              <label className={labelClass}>
+                主體內容（{FILE_NAMES[form.type]}）
+              </label>
+              <textarea
+                required
+                rows={10}
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                className={`${inputClass} font-mono`}
+                placeholder={`在此貼上 ${FILE_NAMES[form.type]} 內容...`}
+              />
+            </div>
+          )}
           <div>
             <label className={labelClass}>README.md（選填）</label>
             <textarea

@@ -8,7 +8,7 @@ import type { PackageType } from '../types'
 const TYPES: { id: PackageType | 'all'; label: string }[] = [
   { id: 'all', label: '全部' },
   { id: 'skill', label: 'Skill' },
-  { id: 'prompt', label: 'Prompt' },
+  { id: 'agent', label: 'Agent' },
   { id: 'mcp', label: 'MCP' },
   { id: 'plugin', label: 'Plugin' },
 ]
