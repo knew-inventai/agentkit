@@ -1,4 +1,4 @@
-export type PackageType = 'skill' | 'prompt' | 'mcp' | 'plugin'
+export type PackageType = 'skill' | 'agent' | 'mcp' | 'plugin'
 
 export interface PackageManifest {
   name: string
@@ -10,7 +10,6 @@ export interface PackageManifest {
     type: PackageType
     tags: string[]
     compatible: string[]
-    dependencies?: string[]
   }
 }
 
@@ -26,7 +25,6 @@ export interface Package {
   license: string
   updatedAt: string       // ISO date string
   repoPath: string        // GitHub raw URL base
-  dependencies?: string[]   // ["skill/code-reviewer@1.0.0", ...]
 }
 
 export interface PackageStats {
@@ -51,20 +49,3 @@ export interface AuthState {
 }
 
 export type SortKey = 'downloads' | 'likes' | 'updated'
-
-export interface ParsedDependency {
-  type: PackageType
-  name: string
-  version: string
-  id: string   // "{type}/{name}"
-}
-
-/**
- * Parse "skill/code-reviewer@1.0.0" → ParsedDependency.
- * Returns null if the string is malformed.
- */
-export function parseDependency(dep: string): ParsedDependency | null {
-  const m = dep.match(/^(skill|prompt|mcp|plugin)\/([a-z0-9-]+)@(\d+\.\d+\.\d+)$/)
-  if (!m) return null
-  return { type: m[1] as PackageType, name: m[2], version: m[3], id: `${m[1]}/${m[2]}` }
-}
