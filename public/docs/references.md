@@ -66,3 +66,6 @@
 |------|------|
 | [Model Context Protocol](https://modelcontextprotocol.io/) | MCP 開放標準官網 |
 | [Semantic Versioning](https://semver.org/lang/zh-TW/) | 套件版本號規範（MAJOR.MINOR.PATCH） |
+| [Cloudflare Workers](https://developers.cloudflare.com/workers/) | AgentKit API 後端（貢獻指南） |
+| [Cloudflare D1](https://developers.cloudflare.com/d1/) | AgentKit 套件索引資料庫（貢獻指南） |
+| [GitHub OAuth Apps](https://docs.github.com/en/apps/oauth-apps) | AgentKit 登入機制（貢獻指南） |

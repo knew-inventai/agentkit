@@ -34,6 +34,16 @@
 | [agentkit-mcp](https://github.com/knew-inventai/agentkit-mcp) | MCP Server 套件集 |
 | [agentkit-plugins](https://github.com/knew-inventai/agentkit-plugins) | Plugin 套件集 |
 
+#### 技術架構
+
+| 層 | 技術 | 文件 |
+|----|------|------|
+| 前端 | React + Vite，部署於 GitHub Pages | [Vite 文件](https://vitejs.dev/guide/) |
+| API | Cloudflare Workers（Hono + TypeScript） | [Cloudflare Workers 文件](https://developers.cloudflare.com/workers/) |
+| 資料庫 | Cloudflare D1（serverless SQLite） | [Cloudflare D1 文件](https://developers.cloudflare.com/d1/) |
+| 套件儲存 | GitHub Repositories（每種類型一個 repo） | — |
+| 驗證 | GitHub OAuth App | [GitHub OAuth 文件](https://docs.github.com/en/apps/oauth-apps) |
+
 ## 套件品質標準
 
 - 主體檔案（SKILL.md / AGENT.md 等）應包含清楚的用途說明
