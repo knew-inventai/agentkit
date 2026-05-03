@@ -46,17 +46,26 @@ MCP 是由 Anthropic 提出的開放標準，Claude Code 與 Codex 均支援。
 
 ---
 
-## CLAUDE.md
+## 持久化指令檔案
 
-Claude Code 的持久化指令檔案，放置於專案根目錄或 `~/.claude/CLAUDE.md`（全域）。每次 session 開始時自動載入，提供 Claude 需要遵循的規範與上下文。
+各 AI coding 工具都有一個「持久化指令檔案」，讓你把專案規範、偏好設定寫進去，每次 session 開始時自動載入。以下是各工具的對應檔案：
 
-Skill 的主體內容通常寫在 `SKILL.md` 中，而非 `CLAUDE.md`。
+| 工具 | 檔案 | 放置位置 |
+|------|------|---------|
+| Claude Code | `CLAUDE.md` | 專案根目錄 或 `~/.claude/CLAUDE.md`（全域） |
+| Codex | `AGENTS.md` | 專案根目錄 或 `~/.codex/AGENTS.md`（全域） |
+| Gemini CLI | `GEMINI.md` | 專案根目錄 或 `~/.gemini/GEMINI.md`（全域） |
+| GitHub Copilot | `.github/copilot-instructions.md` | 專案 `.github/` 目錄 |
 
----
+**注意：** GitHub Copilot 的 Agent 功能也能識別 `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`，因此一份檔案可同時被多個工具使用。
 
-## AGENTS.md
+Skill 的主體內容寫在 `SKILL.md` 中；持久化指令檔案則是給工具本身的行為規範，兩者用途不同。
 
-Codex 的持久化指令檔案，功能等同於 Claude Code 的 `CLAUDE.md`。放置於 repo 根目錄供整個團隊共用，或 `~/.codex/AGENTS.md` 供個人全域使用。
+**參考：**
+- [Claude Code — CLAUDE.md](https://code.claude.com/docs/zh-TW/glossary#claude-md)
+- [Codex — AGENTS.md](https://developers.openai.com/codex/guides/agents-md)
+- [Gemini CLI — GEMINI.md](https://geminicli.com/docs/cli/gemini-md/)
+- [GitHub Copilot — 自訂指令](https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot)
 
 ---
 

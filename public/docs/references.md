@@ -17,6 +17,24 @@
 
 ---
 
+## Gemini CLI 官方文件
+
+| 頁面 | 引用自 |
+|------|--------|
+| [Gemini CLI — Project context (GEMINI.md)](https://geminicli.com/docs/cli/gemini-md/) | 名詞解釋：持久化指令檔案 |
+| [Gemini CLI — Agent Skills](https://geminicli.com/docs/cli/skills/) | 名詞解釋：Skill |
+| [Gemini CLI — Overview](https://geminicli.com/docs/) | 名詞解釋：Gemini CLI |
+
+---
+
+## GitHub Copilot 官方文件
+
+| 頁面 | 引用自 |
+|------|--------|
+| [GitHub Copilot — Repository custom instructions](https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot) | 名詞解釋：持久化指令檔案（`.github/copilot-instructions.md`、AGENTS.md 跨工具相容性） |
+
+---
+
 ## Codex（OpenAI）官方文件
 
 | 頁面 | 引用自 |
