@@ -68,7 +68,6 @@ export function usePackages(token: string | undefined): UsePackagesResult {
           license: item.license,
           updatedAt: item.updatedAt,
           repoPath: item.repoPath,
-          dependencies: item.dependencies,
         }))
 
         const newStats: Record<string, PackageStats> = Object.fromEntries(
