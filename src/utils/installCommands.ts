@@ -72,6 +72,27 @@ export function getInstallCommands(
       ]
     }
 
+    // Agent: installs to ~/.claude/agents/{name}.md (flat file)
+    if (type === 'agent') {
+      const agentPath = scope === 'global'
+        ? `~/.claude/agents/${name}.md`
+        : `.claude/agents/${name}.md`
+      const commands: InstallCommand[] = []
+      if (!version) {
+        commands.push({
+          title: '方式一：Claude Code Marketplace（推薦）',
+          command: `/plugin marketplace add ${ORG}/${repo}\n/plugin install ${name}@${repo}`,
+          language: 'shell',
+        })
+      }
+      commands.push({
+        title: version ? `curl 安裝 v${version}` : '方式二：curl 手動安裝',
+        command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${agentPath}`,
+        language: 'shell',
+      })
+      return commands
+    }
+
     // Skill / Prompt: curl 到 skills 目錄
     const skillPath = scope === 'global'
       ? `~/.claude/skills/${name}/SKILL.md`
@@ -95,7 +116,7 @@ export function getInstallCommands(
   // ─── Cursor ───────────────────────────────────────────
 
   if (tool === 'cursor') {
-    if (type === 'plugin' || type === 'mcp') {
+    if (type === 'plugin' || type === 'mcp' || type === 'agent') {
       return [
         {
           title: '不支援 Cursor 直接安裝',
@@ -139,19 +160,6 @@ export function getInstallCommands(
       language: 'shell',
     },
   ]
-
-  if (type === 'prompt') {
-    commands.push({
-      title: '複製到剪貼板（macOS）',
-      command: `curl -fsSL ${rawUrl} | pbcopy`,
-      language: 'shell',
-    })
-    commands.push({
-      title: '複製到剪貼板（Linux）',
-      command: `curl -fsSL ${rawUrl} | xclip -selection clipboard`,
-      language: 'shell',
-    })
-  }
 
   return commands
 }
