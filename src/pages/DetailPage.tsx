@@ -126,12 +126,23 @@ export default function DetailPage() {
           </button>
 
           {isAuthor && (
-            <button
-              onClick={handleOpenUpdate}
-              className="w-full rounded-md border border-blue-600 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
-            >
-              更新此工具
-            </button>
+            type === 'plugin' ? (
+              <a
+                href={`https://github.com/${import.meta.env.VITE_GITHUB_ORG}/agentkit-plugins/tree/main/${name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-md border border-blue-600 py-2 text-center text-sm text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
+              >
+                在 GitHub 更新此 Plugin →
+              </a>
+            ) : (
+              <button
+                onClick={handleOpenUpdate}
+                className="w-full rounded-md border border-blue-600 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
+              >
+                更新此工具
+              </button>
+            )
           )}
 
           <a
