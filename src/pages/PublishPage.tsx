@@ -94,6 +94,17 @@ export default function PublishPage() {
       const branch = `add/${form.name}-${Date.now()}`
       const mainFileName = FILE_NAMES[form.type]
 
+      // Check for duplicate name in main branch
+      try {
+        await octokit.repos.getContent({ owner: org, repo, path: `${form.name}/plugin.json` })
+        setValidationErrors([`套件名稱「${form.name}」已存在，請改用其他名稱`])
+        setStatus('idle')
+        return
+      } catch (e: unknown) {
+        // 404 means name is available; any other error also proceed
+        if ((e as { status?: number }).status !== 404) throw e
+      }
+
       const { data: ref } = await octokit.git.getRef({ owner: org, repo, ref: 'heads/main' })
       const baseSha = ref.object.sha
 
