@@ -181,6 +181,28 @@ export default function PublishPage() {
     }
   }
 
+  if (status === 'success') {
+    return (
+      <Layout>
+        <div className="mx-auto max-w-2xl py-16 text-center">
+          <div className="mb-6 text-5xl">✓</div>
+          <h2 className="mb-3 text-xl font-semibold text-gray-900 dark:text-white">PR 已建立</h2>
+          <p className="mb-6 text-gray-500 dark:text-gray-400">等待 maintainer review 後正式上線。</p>
+          <a href={prUrl} target="_blank" rel="noopener noreferrer"
+            className="mr-3 rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+            查看 PR →
+          </a>
+          <button
+            onClick={() => { setStatus('idle'); setForm({ type: 'skill', name: '', version: '1.0.0', description: '', tags: '', compatible: 'claude', content: '', readme: '' }) }}
+            className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            再發布一個
+          </button>
+        </div>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
       <div className="mx-auto max-w-2xl">
@@ -193,14 +215,6 @@ export default function PublishPage() {
                 <li key={i} className="text-sm text-red-600 dark:text-red-400">{err}</li>
               ))}
             </ul>
-          </div>
-        )}
-        {status === 'success' && (
-          <div className="mb-4 rounded-lg bg-green-50 p-4 text-green-700 dark:bg-green-900/30 dark:text-green-300">
-            PR 已建立，等待 maintainer review 後正式上線。{' '}
-            <a href={prUrl} target="_blank" rel="noopener noreferrer" className="underline font-medium">
-              查看 PR
-            </a>
           </div>
         )}
         {status === 'error' && (
