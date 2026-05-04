@@ -26,6 +26,17 @@ const inputClass = 'mt-1 w-full rounded border px-3 py-2 text-sm bg-white dark:b
 const KEBAB_RE = /^[a-z][a-z0-9-]+$/
 const SEMVER_RE = /^\d+\.\d+\.\d+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/
 
+// Sort object keys deeply — required so pretty-format-json pre-commit hook passes
+function sortKeysDeep(val: unknown): unknown {
+  if (Array.isArray(val)) return val.map(sortKeysDeep)
+  if (val !== null && typeof val === 'object') {
+    return Object.keys(val as Record<string, unknown>)
+      .sort()
+      .reduce((acc, k) => { acc[k] = sortKeysDeep((val as Record<string, unknown>)[k]); return acc }, {} as Record<string, unknown>)
+  }
+  return val
+}
+
 function validateForm(form: {
   type: PackageType; name: string; version: string; tags: string; content: string
 }): string[] {
@@ -128,9 +139,9 @@ export default function PublishPage() {
       }
 
       const files = [
-        { path: `${form.name}/plugin.json`, content: JSON.stringify(manifest, null, 2) },
-        { path: `${form.name}/${mainFileName}`, content: form.content },
-        ...(form.readme ? [{ path: `${form.name}/README.md`, content: form.readme }] : []),
+        { path: `${form.name}/plugin.json`, content: JSON.stringify(sortKeysDeep(manifest), null, 2) + '\n' },
+        { path: `${form.name}/${mainFileName}`, content: form.content.endsWith('\n') ? form.content : form.content + '\n' },
+        ...(form.readme ? [{ path: `${form.name}/README.md`, content: form.readme.endsWith('\n') ? form.readme : form.readme + '\n' }] : []),
       ]
 
       // Use Git Tree API to create all files in a single commit so pre-commit
