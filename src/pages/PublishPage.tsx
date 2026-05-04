@@ -23,6 +23,27 @@ const REPOS: Record<PackageType, string> = {
 const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300'
 const inputClass = 'mt-1 w-full rounded border px-3 py-2 text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
 
+const KEBAB_RE = /^[a-z][a-z0-9-]+$/
+const SEMVER_RE = /^\d+\.\d+\.\d+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/
+
+function validateForm(form: {
+  type: PackageType; name: string; version: string; tags: string; content: string
+}): string[] {
+  const errors: string[] = []
+  if (!KEBAB_RE.test(form.name))
+    errors.push('名稱必須是 kebab-case（小寫字母開頭，僅含小寫字母、數字、連字號）')
+  if (!SEMVER_RE.test(form.version))
+    errors.push('版本必須符合 SemVer 格式，例：1.0.0')
+  if (form.tags.split(',').map(t => t.trim()).filter(Boolean).length === 0)
+    errors.push('至少需要填寫一個標籤')
+  if (form.type !== 'plugin' && !form.content.trim())
+    errors.push(`${FILE_NAMES[form.type]} 內容不能為空`)
+  if (form.type === 'mcp') {
+    try { JSON.parse(form.content) } catch { errors.push('mcp-config.json 必須是合法的 JSON') }
+  }
+  return errors
+}
+
 export default function PublishPage() {
   const { auth, login } = useAuth()
   const [form, setForm] = useState({
@@ -38,6 +59,7 @@ export default function PublishPage() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [prUrl, setPrUrl] = useState('')
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
 
   if (!auth.token) {
     return (
@@ -54,13 +76,19 @@ export default function PublishPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStatus('submitting')
     setErrorMsg('')
 
     if (form.type === 'plugin') return  // plugin uses GitHub PR flow
 
-    try {
-      const octokit = createGitHubClient(auth.token!)
+    const errors = validateForm(form)
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+    setValidationErrors([])
+    setStatus('submitting')
+
+    try {      const octokit = createGitHubClient(auth.token!)
       const org = import.meta.env.VITE_GITHUB_ORG
       const repo = REPOS[form.type]
       const branch = `add/${form.name}-${Date.now()}`
@@ -124,6 +152,16 @@ export default function PublishPage() {
     <Layout>
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">發布工具</h1>
+        {validationErrors.length > 0 && (
+          <div className="mb-4 rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+            <p className="mb-2 text-sm font-medium text-red-700 dark:text-red-400">請修正以下問題後再提交：</p>
+            <ul className="list-disc pl-5 space-y-1">
+              {validationErrors.map((err, i) => (
+                <li key={i} className="text-sm text-red-600 dark:text-red-400">{err}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         {status === 'success' && (
           <div className="mb-4 rounded-lg bg-green-50 p-4 text-green-700 dark:bg-green-900/30 dark:text-green-300">
             PR 已建立，等待 maintainer review 後正式上線。{' '}
