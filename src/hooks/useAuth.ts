@@ -30,7 +30,7 @@ export function useAuth() {
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
       redirect_uri: callbackUrl,
-      scope: 'read:org',
+      scope: 'repo read:org',
     })
     window.location.href = `https://github.com/login/oauth/authorize?${params}`
   }, [])
