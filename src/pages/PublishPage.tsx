@@ -133,15 +133,26 @@ export default function PublishPage() {
         ...(form.readme ? [{ path: `${form.name}/README.md`, content: form.readme }] : []),
       ]
 
-      for (const file of files) {
-        await octokit.repos.createOrUpdateFileContents({
-          owner: org, repo,
-          path: file.path,
-          message: `feat: add ${form.name} v${form.version}`,
-          content: btoa(unescape(encodeURIComponent(file.content))),
-          branch,
-        })
-      }
+      // Use Git Tree API to create all files in a single commit so pre-commit
+      // sees the complete package and validation passes.
+      const { data: baseCommit } = await octokit.git.getCommit({ owner: org, repo, commit_sha: baseSha })
+      const { data: tree } = await octokit.git.createTree({
+        owner: org, repo,
+        base_tree: baseCommit.tree.sha,
+        tree: files.map(f => ({
+          path: f.path,
+          mode: '100644' as const,
+          type: 'blob' as const,
+          content: f.content,
+        })),
+      })
+      const { data: commit } = await octokit.git.createCommit({
+        owner: org, repo,
+        message: `feat: add ${form.name} v${form.version}`,
+        tree: tree.sha,
+        parents: [baseSha],
+      })
+      await octokit.git.updateRef({ owner: org, repo, ref: `heads/${branch}`, sha: commit.sha })
 
       const { data: pr } = await octokit.pulls.create({
         owner: org, repo,
