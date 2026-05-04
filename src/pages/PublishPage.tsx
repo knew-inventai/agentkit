@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { createGitHubClient } from '../services/github'
 import Layout from '../components/Layout'
@@ -26,7 +25,6 @@ const inputClass = 'mt-1 w-full rounded border px-3 py-2 text-sm bg-white dark:b
 
 export default function PublishPage() {
   const { auth, login } = useAuth()
-  const navigate = useNavigate()
   const [form, setForm] = useState({
     type: 'skill' as PackageType,
     name: '',
@@ -39,6 +37,7 @@ export default function PublishPage() {
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const [prUrl, setPrUrl] = useState('')
 
   if (!auth.token) {
     return (
@@ -105,7 +104,7 @@ export default function PublishPage() {
         })
       }
 
-      await octokit.pulls.create({
+      const { data: pr } = await octokit.pulls.create({
         owner: org, repo,
         title: `feat: add ${form.name} v${form.version}`,
         head: branch,
@@ -113,8 +112,8 @@ export default function PublishPage() {
         body: `## ${form.name}\n\n${form.description}\n\n**類型：** ${form.type}\n**版本：** ${form.version}\n**標籤：** ${form.tags}`,
       })
 
+      setPrUrl(pr.html_url)
       setStatus('success')
-      setTimeout(() => navigate(`/${form.type}/${form.name}`), 2000)
     } catch (e: unknown) {
       setStatus('error')
       setErrorMsg(e instanceof Error ? e.message : '發布失敗')
@@ -127,7 +126,10 @@ export default function PublishPage() {
         <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">發布工具</h1>
         {status === 'success' && (
           <div className="mb-4 rounded-lg bg-green-50 p-4 text-green-700 dark:bg-green-900/30 dark:text-green-300">
-            PR 已建立，等待 maintainer review 後正式上線。即將跳轉...
+            PR 已建立，等待 maintainer review 後正式上線。{' '}
+            <a href={prUrl} target="_blank" rel="noopener noreferrer" className="underline font-medium">
+              查看 PR
+            </a>
           </div>
         )}
         {status === 'error' && (
