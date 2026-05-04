@@ -24,7 +24,7 @@
 Plugin 包含多個檔案，需透過 GitHub 直接提交：
 
 1. Fork `knew-inventai/agentkit-plugins`
-2. 在 fork 中建立 `your-plugin-name/` 目錄，依[目錄結構](/docs?page=types/plugin)填入檔案
+2. 在 fork 中建立 `your-plugin-name/` 目錄，依[目錄結構](/agentkit/docs?page=types/plugin)填入檔案
 3. 開 Pull Request 到主 repo
 
 ## 審核標準

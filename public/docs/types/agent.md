@@ -63,4 +63,4 @@ curl -fsSL https://raw.githubusercontent.com/knew-inventai/agentkit-agents/main/
 
 ---
 
-> **參考文獻：** [Claude Code — Sub-agents](https://code.claude.com/docs/zh-TW/sub-agents) · [Claude Code — Subagent 詞彙](https://code.claude.com/docs/zh-TW/glossary#subagent) · [Codex — Subagents](https://developers.openai.com/codex/concepts/subagents) · [完整參考文獻列表](/docs?page=references)
+> **參考文獻：** [Claude Code — Sub-agents](https://code.claude.com/docs/zh-TW/sub-agents) · [Claude Code — Subagent 詞彙](https://code.claude.com/docs/zh-TW/glossary#subagent) · [Codex — Subagents](https://developers.openai.com/codex/concepts/subagents) · [完整參考文獻列表](/agentkit/docs?page=references)

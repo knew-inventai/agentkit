@@ -56,4 +56,4 @@ curl -fsSL https://raw.githubusercontent.com/knew-inventai/agentkit-mcp/main/{na
 
 ---
 
-> **參考文獻：** [Claude Code — MCP](https://code.claude.com/docs/zh-TW/mcp) · [Codex — MCP](https://developers.openai.com/codex/mcp) · [Model Context Protocol 官網](https://modelcontextprotocol.io/) · [完整參考文獻列表](/docs?page=references)
+> **參考文獻：** [Claude Code — MCP](https://code.claude.com/docs/zh-TW/mcp) · [Codex — MCP](https://developers.openai.com/codex/mcp) · [Model Context Protocol 官網](https://modelcontextprotocol.io/) · [完整參考文獻列表](/agentkit/docs?page=references)

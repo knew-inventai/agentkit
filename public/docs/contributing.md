@@ -6,7 +6,7 @@
 
 ### 提交新套件
 
-最常見的貢獻方式。請參閱 [發布套件](/docs?page=publishing) 文件。
+最常見的貢獻方式。請參閱 [發布套件](/agentkit/docs?page=publishing) 文件。
 
 ### 回報問題
 

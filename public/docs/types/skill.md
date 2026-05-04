@@ -65,4 +65,4 @@ curl -fsSL https://raw.githubusercontent.com/knew-inventai/agentkit-skills/main/
 
 ---
 
-> **參考文獻：** [Claude Code — Skills](https://code.claude.com/docs/zh-TW/skills) · [Codex — Skills](https://developers.openai.com/codex/skills) · [完整參考文獻列表](/docs?page=references)
+> **參考文獻：** [Claude Code — Skills](https://code.claude.com/docs/zh-TW/skills) · [Codex — Skills](https://developers.openai.com/codex/skills) · [完整參考文獻列表](/agentkit/docs?page=references)
