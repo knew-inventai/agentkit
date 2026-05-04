@@ -7,7 +7,7 @@
 
 ## Skill / Agent / MCP Server 發布流程
 
-1. 前往 [發布頁面](/agentkit/#/publish)
+1. 前往 [發布頁面](/agentkit/publish)
 2. 選擇套件類型
 3. 填寫：
    - **套件名稱**（slug，英文小寫加連字號）
