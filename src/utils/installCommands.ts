@@ -47,7 +47,34 @@ export function getInstallCommands(
         },
       ]
     }
-    // mcp: manual config
+    if (type === 'plugin') {
+      const commands: InstallCommand[] = []
+      if (!version) {
+        commands.push({
+          title: '方式一：copilot plugin 指令（推薦）',
+          command: [
+            `copilot plugin marketplace add ${ORG}/${repo}`,
+            `copilot plugin install ${name}@${repo}`,
+          ].join('\n'),
+          language: 'shell',
+        })
+      }
+      const pluginDir = scope === 'global'
+        ? `~/.copilot/plugins/${name}`
+        : `.github/plugins/${name}`
+      commands.push({
+        title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
+        command: [
+          `git clone --depth=1 --filter=blob:none --sparse \\`,
+          `  ${repoUrl}.git /tmp/${repo}`,
+          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+          `mkdir -p ${pluginDir}`,
+          `cp -r ${name}/. ${pluginDir}/`,
+        ].join('\n'),
+        language: 'shell',
+      })
+      return commands
+    }
     if (type === 'mcp') {
       return [
         {
@@ -57,7 +84,7 @@ export function getInstallCommands(
         },
       ]
     }
-    // agent / plugin: not natively supported
+    // agent: not natively supported
     return [
       {
         title: '不支援直接安裝',
@@ -172,6 +199,34 @@ export function getInstallCommands(
           language: 'shell',
         },
       ]
+    }
+    if (type === 'plugin') {
+      const commands: InstallCommand[] = []
+      if (!version) {
+        commands.push({
+          title: '方式一：codex plugin marketplace 指令（推薦）',
+          command: [
+            `codex plugin marketplace add ${ORG}/${repo}`,
+            `# 然後在 Codex Plugin Directory 中安裝 ${name}`,
+          ].join('\n'),
+          language: 'shell',
+        })
+      }
+      const pluginDir = scope === 'global'
+        ? `~/.codex/plugins/${name}`
+        : `.agents/plugins/${name}`
+      commands.push({
+        title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
+        command: [
+          `git clone --depth=1 --filter=blob:none --sparse \\`,
+          `  ${repoUrl}.git /tmp/${repo}`,
+          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+          `mkdir -p ${pluginDir}`,
+          `cp -r ${name}/. ${pluginDir}/`,
+        ].join('\n'),
+        language: 'shell',
+      })
+      return commands
     }
     if (type === 'mcp') {
       return [
