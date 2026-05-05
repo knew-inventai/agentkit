@@ -84,14 +84,20 @@ export function getInstallCommands(
         },
       ]
     }
-    // agent: not natively supported
-    return [
-      {
-        title: '不支援直接安裝',
-        command: `# ${type} 類型目前不支援 GitHub Copilot 直接安裝\n# 請改用 Claude Code`,
-        language: 'shell',
-      },
-    ]
+    // agent: Copilot custom agent profile is Markdown, compatible with AgentKit AGENT.md
+    if (type === 'agent') {
+      const agentPath = scope === 'global'
+        ? `~/.copilot/agents/${name}.md`
+        : `.github/agents/${name}.md`
+      return [
+        {
+          title: version ? `curl 安裝 v${version}` : 'curl 安裝',
+          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${agentPath}`,
+          language: 'shell',
+        },
+      ]
+    }
+    return []
   }
 
   // ─── Claude Code ──────────────────────────────────────
@@ -237,13 +243,22 @@ export function getInstallCommands(
         },
       ]
     }
-    return [
-      {
-        title: '不支援直接安裝',
-        command: `# ${type} 類型目前不支援 OpenAI Codex 直接安裝\n# 請改用 Claude Code`,
-        language: 'shell',
-      },
-    ]
+    // agent: Codex subagents use TOML format, incompatible with AgentKit's Markdown AGENT.md
+    if (type === 'agent') {
+      return [
+        {
+          title: '格式不相容（僅供參考）',
+          command: [
+            `# Codex subagent 使用 TOML 格式（.codex/agents/<name>.toml）`,
+            `# AgentKit 的 AGENT.md 為 Markdown 格式，需手動轉換`,
+            `# 原始檔案下載：`,
+            `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.md`,
+          ].join('\n'),
+          language: 'shell',
+        },
+      ]
+    }
+    return []
   }
 
   // ─── 通用下載 ─────────────────────────────────────────
