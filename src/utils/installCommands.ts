@@ -22,6 +22,51 @@ export function getInstallCommands(
     ? getRawFileUrlAtTag(type, name, version)
     : getRawFileUrl(type, name)
 
+  // ─── GitHub Copilot ───────────────────────────────────
+
+  if (tool === 'copilot') {
+    if (type === 'skill') {
+      const scopeFlag = scope === 'global' ? '--scope user' : '--scope project'
+      const installCmd = version
+        ? `gh skill install ${ORG}/${repo} ${name}@${version} ${scopeFlag}`
+        : `gh skill install ${ORG}/${repo} ${name} ${scopeFlag}`
+      return [
+        {
+          title: '方式一：gh skill 指令（推薦）',
+          command: installCmd,
+          language: 'shell',
+        },
+        {
+          title: '方式二：手動安裝',
+          command: [
+            `# 下載至個人技能目錄`,
+            `curl -fsSL ${rawUrl} \\`,
+            `  --create-dirs -o ${scope === 'global' ? '~/.copilot' : '.github'}/skills/${name}/SKILL.md`,
+          ].join('\n'),
+          language: 'shell',
+        },
+      ]
+    }
+    // mcp: manual config
+    if (type === 'mcp') {
+      return [
+        {
+          title: 'MCP 設定（手動）',
+          command: `# 下載設定檔後，加入 VS Code Copilot MCP 設定\ncurl -fsSL ${rawUrl} -o ~/Downloads/${name}.json`,
+          language: 'shell',
+        },
+      ]
+    }
+    // agent / plugin: not natively supported
+    return [
+      {
+        title: '不支援直接安裝',
+        command: `# ${type} 類型目前不支援 GitHub Copilot 直接安裝\n# 請改用 Claude Code`,
+        language: 'shell',
+      },
+    ]
+  }
+
   // ─── Claude Code ──────────────────────────────────────
 
   if (tool === 'claude-code') {
@@ -113,25 +158,34 @@ export function getInstallCommands(
     return commands
   }
 
-  // ─── Cursor ───────────────────────────────────────────
+  // ─── OpenAI Codex ─────────────────────────────────────
 
-  if (tool === 'cursor') {
-    if (type === 'plugin' || type === 'mcp' || type === 'agent') {
+  if (tool === 'codex') {
+    if (type === 'skill') {
+      const skillPath = scope === 'global'
+        ? `~/.agents/skills/${name}/SKILL.md`
+        : `.agents/skills/${name}/SKILL.md`
       return [
         {
-          title: '不支援 Cursor 直接安裝',
-          command: `# ${type} 類型需透過 Claude Code 安裝，詳見 README`,
+          title: version ? `curl 安裝 v${version}` : 'curl 安裝',
+          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
           language: 'shell',
         },
       ]
     }
-    const cursorPath = scope === 'global'
-      ? `~/.cursor/rules/${name}.mdc`
-      : `.cursor/rules/${name}.mdc`
+    if (type === 'mcp') {
+      return [
+        {
+          title: 'MCP 設定（手動）',
+          command: `# 下載設定檔後，加入 ~/.codex/config.toml 的 [[mcp_servers]] 區塊\ncurl -fsSL ${rawUrl} -o ~/Downloads/${name}.json`,
+          language: 'shell',
+        },
+      ]
+    }
     return [
       {
-        title: version ? `curl 安裝 v${version}` : 'curl 安裝',
-        command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${cursorPath}`,
+        title: '不支援直接安裝',
+        command: `# ${type} 類型目前不支援 OpenAI Codex 直接安裝\n# 請改用 Claude Code`,
         language: 'shell',
       },
     ]
@@ -153,13 +207,12 @@ export function getInstallCommands(
   }
 
   const ext = type === 'mcp' ? 'json' : 'md'
-  const commands: InstallCommand[] = [
+  return [
     {
       title: version ? `下載 v${version} 到本機` : '下載到本機',
       command: `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.${ext}`,
       language: 'shell',
     },
   ]
-
-  return commands
 }
+

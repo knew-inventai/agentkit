@@ -3,8 +3,9 @@ import type { InstallScope, InstallTool, PackageType } from '../types'
 import { getInstallCommands } from '../utils/installCommands'
 
 const TOOLS: { id: InstallTool; label: string }[] = [
+  { id: 'copilot', label: 'GitHub Copilot' },
   { id: 'claude-code', label: 'Claude Code' },
-  { id: 'cursor', label: 'Cursor' },
+  { id: 'codex', label: 'OpenAI Codex' },
   { id: 'download', label: '通用下載' },
 ]
 
@@ -16,7 +17,7 @@ interface Props {
 }
 
 export default function InstallPanel({ type, name, version, token: _token }: Props) {
-  const [tool, setTool] = useState<InstallTool>('claude-code')
+  const [tool, setTool] = useState<InstallTool>('copilot')
   const [scope, setScope] = useState<InstallScope>('global')
   const [copied, setCopied] = useState<string | null>(null)
 

@@ -39,7 +39,7 @@ export interface PackageRelease {
   notes: string
 }
 
-export type InstallTool = 'claude-code' | 'cursor' | 'download'
+export type InstallTool = 'copilot' | 'claude-code' | 'codex' | 'download'
 export type InstallScope = 'global' | 'project'
 
 export interface AuthState {
