@@ -5,6 +5,7 @@ import SearchPage from './pages/SearchPage'
 import DetailPage from './pages/DetailPage'
 import PublishPage from './pages/PublishPage'
 import DocsPage from './pages/DocsPage'
+import LikedPage from './pages/LikedPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/publish" element={<PublishPage />} />
         <Route path="/docs" element={<DocsPage />} />
+        <Route path="/liked" element={<LikedPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/:type/:name" element={<DetailPage />} />
       </Routes>

@@ -35,6 +35,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <nav className="flex items-center gap-6">
             <Link to="/browse" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">瀏覽</Link>
             <Link to="/search" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">搜尋</Link>
+            {auth.token && (
+              <Link to="/liked" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">🔖 收藏</Link>
+            )}
             <Link to="/docs" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">使用手冊</Link>
             <div className="flex items-center gap-3">
               <GitHubStarButton />
