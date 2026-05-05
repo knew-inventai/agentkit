@@ -307,3 +307,114 @@ export async function updatePackageFiles(
 
   return pr.html_url
 }
+
+/** Returns true if branch already exists in the repo */
+export async function checkBranchExists(
+  octokit: Octokit,
+  type: PackageType,
+  name: string,
+): Promise<boolean> {
+  const repo = REPOS[type]
+  try {
+    await octokit.git.getRef({
+      owner: ORG,
+      repo,
+      ref: `heads/remove/${type}/${name}`,
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+export interface RemovePackagePayload {
+  type: PackageType
+  name: string
+  reason: string
+  details: string
+  requesterLogin: string
+}
+
+/** Creates a PR that deletes the entire package folder */
+export async function removePackageFiles(
+  octokit: Octokit,
+  payload: RemovePackagePayload,
+): Promise<string> {
+  const org = ORG
+  const repo = REPOS[payload.type]
+  const branch = `remove/${payload.type}/${payload.name}`
+
+  // 1. Get main branch commit SHA
+  const { data: ref } = await octokit.git.getRef({ owner: org, repo, ref: 'heads/main' })
+  const baseSha = ref.object.sha
+
+  // 2. Get the tree SHA of the base commit
+  const { data: baseCommit } = await octokit.git.getCommit({
+    owner: org,
+    repo,
+    commit_sha: baseSha,
+  })
+
+  // 3. List files in the package folder
+  const { data: folderContents } = await octokit.repos.getContent({
+    owner: org,
+    repo,
+    path: payload.name,
+  })
+
+  if (!Array.isArray(folderContents)) throw new Error('Folder not found')
+
+  // 4. Create branch from main
+  await octokit.git.createRef({
+    owner: org,
+    repo,
+    ref: `refs/heads/${branch}`,
+    sha: baseSha,
+  })
+
+  // 5. Build deletion tree (sha: null = delete)
+  const treeItems = folderContents.map((f) => ({
+    path: f.path,
+    mode: '100644' as const,
+    type: 'blob' as const,
+    sha: null as string | null,
+  }))
+
+  const { data: newTree } = await octokit.git.createTree({
+    owner: org,
+    repo,
+    base_tree: baseCommit.tree.sha,
+    tree: treeItems,
+  })
+
+  // 6. Create commit
+  const { data: newCommit } = await octokit.git.createCommit({
+    owner: org,
+    repo,
+    message: `remove: delete ${payload.name}`,
+    tree: newTree.sha,
+    parents: [baseSha],
+  })
+
+  // 7. Update branch ref
+  await octokit.git.updateRef({
+    owner: org,
+    repo,
+    ref: `heads/${branch}`,
+    sha: newCommit.sha,
+  })
+
+  // 8. Create PR
+  const body = `## 下架請求\n\n**套件**：${payload.type}/${payload.name}\n**理由**：${payload.reason}\n**說明**：${payload.details}\n\n---\n*由 @${payload.requesterLogin} 透過 AgentKit 發起*`
+
+  const { data: pr } = await octokit.pulls.create({
+    owner: org,
+    repo,
+    title: `[Remove] ${payload.type}/${payload.name}`,
+    head: branch,
+    base: 'main',
+    body,
+  })
+
+  return pr.html_url
+}
