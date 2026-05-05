@@ -28,7 +28,7 @@ export interface Package {
 }
 
 export interface PackageStats {
-  downloads: number
+  views: number
   likes: number
   liked_by_me: boolean
 }
@@ -48,4 +48,4 @@ export interface AuthState {
   isLoading: boolean
 }
 
-export type SortKey = 'downloads' | 'likes' | 'updated'
+export type SortKey = 'views' | 'likes' | 'updated'
