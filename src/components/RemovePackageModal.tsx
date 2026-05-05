@@ -94,6 +94,7 @@ export default function RemovePackageModal({
           </h2>
           <button
             onClick={onClose}
+            aria-label="關閉"
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none"
           >
             ✕
@@ -107,8 +108,8 @@ export default function RemovePackageModal({
             </div>
           )}
 
-          <div>
-            <label className={labelClass}>請選擇下架理由</label>
+          <fieldset>
+            <legend className={labelClass}>請選擇下架理由</legend>
             <div className="mt-2 space-y-2">
               {REASONS.map((r, i) => (
                 <label key={i} className="flex items-center gap-2 cursor-pointer">
@@ -117,14 +118,14 @@ export default function RemovePackageModal({
                     name="reason"
                     value={i}
                     checked={selectedReason === i}
-                    onChange={() => { setSelectedReason(i); setDetails('') }}
+                    onChange={() => { setSelectedReason(i); setErrorMsg(''); setStatus('idle') }}
                     className="accent-red-600"
                   />
                   <span className="text-sm text-gray-800 dark:text-gray-200">{r.label}</span>
                 </label>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           <div>
             <label className={labelClass}>補充說明（必填）</label>
@@ -133,7 +134,7 @@ export default function RemovePackageModal({
               required
               placeholder={currentPlaceholder}
               value={details}
-              onChange={(e) => setDetails(e.target.value)}
+              onChange={(e) => { setDetails(e.target.value); if (status === 'error') { setErrorMsg(''); setStatus('idle') } }}
               className={inputClass}
             />
           </div>
