@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePackageDetail } from '../hooks/usePackageDetail'
 import { useAuth } from '../hooks/useAuth'
-import { toggleLike, recordDownload } from '../services/api'
+import { toggleLike, recordView } from '../services/api'
 import { getRawFileUrl } from '../services/github'
 import Layout from '../components/Layout'
 import UpdatePackageModal from '../components/UpdatePackageModal'
@@ -26,6 +26,11 @@ export default function DetailPage() {
     error,
   } = usePackageDetail(type as PackageType, name!, auth.token ?? undefined)
 
+  // 頁面載入時記錄瀏覽數（effect 只在 type/name 確定後執行一次）
+  useEffect(() => {
+    if (type && name) recordView(type, name)
+  }, [type, name])
+
   const [updatePrUrl, setUpdatePrUrl] = useState<string | null>(null)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [bodyContent, setBodyContent] = useState<string | null>(null)
@@ -46,13 +51,6 @@ export default function DetailPage() {
         liked_by_me: liked,
       }))
     } catch { /* ignore */ }
-  }
-
-  const handleDownload = async () => {
-    if (!auth.token || !type || !name) return
-    await recordDownload(auth.token, type, name)
-    setStats((prev) => ({ ...prev, downloads: prev.downloads + 1 }))
-    window.open(getRawFileUrl(type as PackageType, name), '_blank')
   }
 
   const handleOpenUpdate = async () => {
@@ -109,9 +107,9 @@ export default function DetailPage() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
               } disabled:cursor-not-allowed`}
             >
-              👍 {stats.likes}
+              🔖 {stats.likes}
             </button>
-            <span className="text-sm text-gray-500 dark:text-gray-400">⬇ {stats.downloads} 次下載</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">👁 {stats.views}</span>
           </div>
 
           <InstallPanel
@@ -120,13 +118,6 @@ export default function DetailPage() {
             version={selectedVersion ?? undefined}
             token={auth.token ?? undefined}
           />
-
-          <button
-            onClick={handleDownload}
-            className="w-full rounded-md bg-blue-600 py-2 text-sm text-white hover:bg-blue-700"
-          >
-            下載主體檔案
-          </button>
 
           {isAuthor && (
             type === 'plugin' ? (
