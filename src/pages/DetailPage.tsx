@@ -6,6 +6,7 @@ import { toggleLike, recordDownload } from '../services/api'
 import { getRawFileUrl } from '../services/github'
 import Layout from '../components/Layout'
 import UpdatePackageModal from '../components/UpdatePackageModal'
+import RemovePackageModal from '../components/RemovePackageModal'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import InstallPanel from '../components/InstallPanel'
 import type { PackageType } from '../types'
@@ -29,6 +30,8 @@ export default function DetailPage() {
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [bodyContent, setBodyContent] = useState<string | null>(null)
   const [showAllVersions, setShowAllVersions] = useState(false)
+  const [showRemoveModal, setShowRemoveModal] = useState(false)
+  const [removePrUrl, setRemovePrUrl] = useState<string | null>(null)
 
   const VERSION_PREVIEW = 3
   const visibleReleases = showAllVersions ? releases : releases.slice(0, VERSION_PREVIEW)
@@ -154,6 +157,27 @@ export default function DetailPage() {
             在 GitHub 檢視 →
           </a>
 
+          {/* 下架請求 — 低調連結，僅登入用戶可見 */}
+          {auth.token && auth.username && (
+            <div className="text-center">
+              {removePrUrl ? (
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  下架請求已送出 —{' '}
+                  <a href={removePrUrl} target="_blank" rel="noreferrer" className="underline">
+                    查看 PR
+                  </a>
+                </p>
+              ) : (
+                <button
+                  onClick={() => setShowRemoveModal(true)}
+                  className="text-xs text-gray-400 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 underline-offset-2 hover:underline transition-colors"
+                >
+                  請求下架此套件
+                </button>
+              )}
+            </div>
+          )}
+
           {releases.length > 0 && (
             <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">版本歷史</h3>
@@ -251,6 +275,19 @@ export default function DetailPage() {
           onSuccess={(url) => {
             setUpdatePrUrl(url)
             setShowUpdateModal(false)
+          }}
+        />
+      )}
+      {showRemoveModal && auth.token && auth.username && (
+        <RemovePackageModal
+          type={type as PackageType}
+          name={name!}
+          token={auth.token}
+          requesterLogin={auth.username}
+          onClose={() => setShowRemoveModal(false)}
+          onSuccess={(prUrl) => {
+            setRemovePrUrl(prUrl)
+            setShowRemoveModal(false)
           }}
         />
       )}
