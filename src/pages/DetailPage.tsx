@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { usePackageDetail } from '../hooks/usePackageDetail'
 import { useAuth } from '../hooks/useAuth'
 import { toggleLike, recordView } from '../services/api'
@@ -63,7 +63,24 @@ export default function DetailPage() {
   }
 
   if (isLoading) return <Layout><p className="text-gray-400 dark:text-gray-500">載入中...</p></Layout>
-  if (error || !manifest) return <Layout><p className="text-red-500">載入失敗：{error}</p></Layout>
+  if (!manifest) {
+    const isNotFound = !error || /not found/i.test(error)
+    return (
+      <Layout>
+        {isNotFound ? (
+          <div className="text-center py-16">
+            <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-2">找不到此套件</p>
+            <p className="text-gray-400 dark:text-gray-500 mb-6">它可能已被下架或網址有誤。</p>
+            <Link to="/browse" className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+              瀏覽所有套件 →
+            </Link>
+          </div>
+        ) : (
+          <p className="text-red-500">載入失敗：{error}</p>
+        )}
+      </Layout>
+    )
+  }
 
   const isAuthor =
     auth.username != null &&
