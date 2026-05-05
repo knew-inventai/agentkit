@@ -33,7 +33,7 @@ export function usePackages(token: string | undefined): UsePackagesResult {
   const [error, setError] = useState<string | null>(null)
   const [fetchState, setFetchState] = useState<FetchState>({
     type: 'all',
-    sort: 'downloads',
+    sort: 'views',
     q: '',
     offset: 0,
   })
@@ -73,7 +73,7 @@ export function usePackages(token: string | undefined): UsePackagesResult {
         const newStats: Record<string, PackageStats> = Object.fromEntries(
           res.packages.map((item) => [
             item.id,
-            { downloads: item.downloads, likes: item.likes, liked_by_me: item.liked_by_me },
+            { views: item.views, likes: item.likes, liked_by_me: item.liked_by_me },
           ]),
         )
 

@@ -15,7 +15,7 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
   const [readme, setReadme] = useState('')
   const [releases, setReleases] = useState<PackageRelease[]>([])
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
-  const [stats, setStats] = useState<PackageStats>({ downloads: 0, likes: 0, liked_by_me: false })
+  const [stats, setStats] = useState<PackageStats>({ views: 0, likes: 0, liked_by_me: false })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,7 +39,7 @@ export function usePackageDetail(type: PackageType, name: string, token?: string
         setManifest(m)
         setReadme(r)
         setReleases(rel)
-        setStats(s[packageId] ?? { downloads: 0, likes: 0, liked_by_me: false })
+        setStats(s[packageId] ?? { views: 0, likes: 0, liked_by_me: false })
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setIsLoading(false))
