@@ -65,8 +65,8 @@ export default function BrowsePage() {
           onChange={(e) => setSort(e.target.value as typeof sort)}
           className="ml-auto rounded border px-2 py-1 text-sm text-gray-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
         >
-          <option value="downloads">依下載數排序</option>
-          <option value="likes">依 👍 排序</option>
+          <option value="views">依瀏覽數排序</option>
+          <option value="likes">依 🔖 排序</option>
           <option value="updated">依更新時間排序</option>
         </select>
       </div>

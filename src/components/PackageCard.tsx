@@ -39,8 +39,8 @@ export default function PackageCard({ pkg, stats }: Props) {
       </div>
       {stats && (
         <div className="mt-3 flex items-center gap-4 border-t border-gray-100 dark:border-gray-700 pt-3 text-xs text-gray-400 dark:text-gray-500">
-          <span>👍 {stats.likes}</span>
-          <span>⬇ {stats.downloads}</span>
+          <span>🔖 {stats.likes}</span>
+          <span>👁 {stats.views}</span>
           <span className="ml-auto">v{pkg.version}</span>
         </div>
       )}

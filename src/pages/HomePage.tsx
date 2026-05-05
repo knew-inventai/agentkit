@@ -9,7 +9,7 @@ export default function HomePage() {
   const { packages, stats, isLoading } = usePackages(auth.token ?? undefined)
 
   const sorted = [...packages].sort(
-    (a, b) => (stats[b.id]?.downloads ?? 0) - (stats[a.id]?.downloads ?? 0),
+    (a, b) => (stats[b.id]?.views ?? 0) - (stats[a.id]?.views ?? 0),
   )
 
   return (
