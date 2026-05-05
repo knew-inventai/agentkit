@@ -40,15 +40,8 @@ export async function toggleLike(
   return data.liked
 }
 
-export async function recordDownload(
-  token: string,
-  type: string,
-  name: string,
-): Promise<void> {
-  await fetch(`${API_BASE}/packages/${type}/${name}/download`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-  })
+export async function recordView(type: string, name: string): Promise<void> {
+  await fetch(`${API_BASE}/packages/${type}/${name}/view`, { method: 'POST' })
 }
 
 // ─── Package listing (D1-backed) ──────────────────────────
@@ -65,7 +58,7 @@ export interface PackageListItem {
   license: string
   updatedAt: string
   repoPath: string
-  downloads: number
+  views: number
   likes: number
   liked_by_me: boolean
 }
@@ -115,4 +108,13 @@ export async function fetchPackageById(
   const res = await fetch(`${API_BASE}/packages/${type}/${name}`, { headers })
   if (!res.ok) throw new Error(`fetchPackageById ${type}/${name}: ${res.status}`)
   return res.json() as Promise<PackageListItem>
+}
+
+export async function fetchLikedPackages(token: string): Promise<PackageListItem[]> {
+  const res = await fetch(`${API_BASE}/users/me/likes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error(`fetchLikedPackages failed: ${res.status}`)
+  const data = await res.json() as { packages: PackageListItem[] }
+  return data.packages
 }
