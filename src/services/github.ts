@@ -322,8 +322,11 @@ export async function checkBranchExists(
       ref: `heads/remove/${type}/${name}`,
     })
     return true
-  } catch {
-    return false
+  } catch (e: unknown) {
+    if (e instanceof Error && 'status' in e && (e as { status: number }).status === 404) {
+      return false
+    }
+    throw e
   }
 }
 
@@ -355,14 +358,20 @@ export async function removePackageFiles(
     commit_sha: baseSha,
   })
 
-  // 3. List files in the package folder
-  const { data: folderContents } = await octokit.repos.getContent({
+  // 3. Get full recursive tree to find all blobs under {name}/
+  const { data: treeData } = await octokit.git.getTree({
     owner: org,
     repo,
-    path: payload.name,
+    tree_sha: baseCommit.tree.sha,
+    recursive: '1',
   })
 
-  if (!Array.isArray(folderContents)) throw new Error('Folder not found')
+  const prefix = `${payload.name}/`
+  const blobPaths = (treeData.tree ?? [])
+    .filter((item) => item.type === 'blob' && item.path?.startsWith(prefix))
+    .map((item) => item.path!)
+
+  if (blobPaths.length === 0) throw new Error(`No files found under ${payload.name}/`)
 
   // 4. Create branch from main
   await octokit.git.createRef({
@@ -372,9 +381,9 @@ export async function removePackageFiles(
     sha: baseSha,
   })
 
-  // 5. Build deletion tree (sha: null = delete)
-  const treeItems = folderContents.map((f) => ({
-    path: f.path,
+  // 5. Build deletion tree (sha: null removes the file from the tree)
+  const treeItems = blobPaths.map((path) => ({
+    path,
     mode: '100644' as const,
     type: 'blob' as const,
     sha: null as string | null,
