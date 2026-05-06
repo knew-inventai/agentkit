@@ -147,29 +147,48 @@ export function getInstallCommands(
       const agentPath = scope === 'global'
         ? `~/.claude/agents/${name}.md`
         : `.claude/agents/${name}.md`
-      const commands: InstallCommand[] = []
-      if (!version) {
-        commands.push({
-          title: '方式一：Claude Code Marketplace（推薦）',
-          command: `/plugin marketplace add ${ORG}/${repo}\n/plugin install ${name}@${repo}`,
+      const cloneCmd = version
+        ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
+        : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
+      return [
+        {
+          title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
+          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${agentPath}`,
           language: 'shell',
-        })
-      }
-      commands.push({
-        title: version ? `curl 安裝 v${version}` : '方式二：curl 手動安裝',
-        command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${agentPath}`,
-        language: 'shell',
-      })
-      return commands
+        },
+        {
+          title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
+          command: [
+            cloneCmd,
+            `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+            `mkdir -p $(dirname ${agentPath})`,
+            `cp /tmp/${repo}/${name}/AGENT.md ${agentPath}`,
+          ].join('\n'),
+          language: 'shell',
+        },
+      ]
     }
     // skill
     const skillPath = scope === 'global'
       ? `~/.claude/skills/${name}/SKILL.md`
       : `.claude/skills/${name}/SKILL.md`
+    const cloneCmd = version
+      ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
+      : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
     return [
       {
-        title: version ? `curl 安裝 v${version}` : 'curl 安裝',
+        title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
         command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
+        language: 'shell',
+      },
+      {
+        title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
+        command: [
+          cloneCmd,
+          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+          `mkdir -p $(dirname ${skillPath})`,
+          `cp /tmp/${repo}/${name}/SKILL.md ${skillPath}`,
+        ].join('\n'),
         language: 'shell',
       },
     ]
