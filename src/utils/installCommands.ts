@@ -85,7 +85,15 @@ export function getInstallCommands(
       return [
         {
           title: '設定',
-          command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入\n#    VS Code → Settings → Copilot MCP Servers`,
+          command: [
+            `# 設定檔內容：`,
+            `#   ${rawUrl}`,
+            `#`,
+            `# Copilot CLI：將 mcpServers 內容加入`,
+            `#   ~/.copilot/mcp-config.json`,
+            `#`,
+            `# VS Code：Settings → Copilot → MCP Servers`,
+          ].join('\n'),
           language: 'shell',
         },
       ]
