@@ -22,9 +22,10 @@ function singleFileInstallCommands(
   srcFile: string,    // filename inside the repo dir (e.g. SKILL.md)
   version?: string,
 ): InstallCommand[] {
+  const tmpDir = `/tmp/${repo}-$(date +%s)`
   const cloneCmd = version
-    ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
-    : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
+    ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git ${tmpDir}`
+    : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git ${tmpDir}`
   const browseUrl = version
     ? `${repoUrl}/blob/${name}%40${version}/${name}/${srcFile}`
     : `${repoUrl}/blob/main/${name}/${srcFile}`
@@ -38,9 +39,9 @@ function singleFileInstallCommands(
       title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
       command: [
         cloneCmd,
-        `git -C /tmp/${repo} sparse-checkout set ${name}`,
+        `git -C ${tmpDir} sparse-checkout set ${name}`,
         `mkdir -p $(dirname ${destPath})`,
-        `cp /tmp/${repo}/${name}/${srcFile} ${destPath}`,
+        `cp ${tmpDir}/${name}/${srcFile} ${destPath}`,
       ].join('\n'),
       language: 'shell',
     },
@@ -110,11 +111,12 @@ export function getInstallCommands(
       commands.push({
         title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
         command: [
+          `_tmp="/tmp/${repo}-$(date +%s)"`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git /tmp/${repo}`,
-          `git -C /tmp/${repo} sparse-checkout set ${name}`,
+          `  ${repoUrl}.git $_tmp`,
+          `git -C $_tmp sparse-checkout set ${name}`,
           `mkdir -p ${pluginDir}`,
-          `cp -r ${name}/. ${pluginDir}/`,
+          `cp -r $_tmp/${name}/. ${pluginDir}/`,
         ].join('\n'),
         language: 'shell',
       })
@@ -165,11 +167,12 @@ export function getInstallCommands(
       commands.push({
         title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
         command: [
+          `_tmp="/tmp/${repo}-$(date +%s)"`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git /tmp/${repo}`,
-          `git -C /tmp/${repo} sparse-checkout set ${name}`,
+          `  ${repoUrl}.git $_tmp`,
+          `git -C $_tmp sparse-checkout set ${name}`,
           `mkdir -p ${pluginDir}`,
-          `cp -r ${name}/. ${pluginDir}/`,
+          `cp -r $_tmp/${name}/. ${pluginDir}/`,
         ].join('\n'),
         language: 'shell',
       })
@@ -231,11 +234,12 @@ export function getInstallCommands(
       commands.push({
         title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
         command: [
+          `_tmp="/tmp/${repo}-$(date +%s)"`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git /tmp/${repo}`,
-          `git -C /tmp/${repo} sparse-checkout set ${name}`,
+          `  ${repoUrl}.git $_tmp`,
+          `git -C $_tmp sparse-checkout set ${name}`,
           `mkdir -p ${pluginDir}`,
-          `cp -r ${name}/. ${pluginDir}/`,
+          `cp -r $_tmp/${name}/. ${pluginDir}/`,
         ].join('\n'),
         language: 'shell',
       })
@@ -288,9 +292,10 @@ export function getInstallCommands(
       {
         title: 'git sparse-checkout（推薦）',
         command: [
+          `_tmp="$HOME/Downloads/${repo}-$(date +%s)"`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git ~/Downloads/${repo}`,
-          `git -C ~/Downloads/${repo} sparse-checkout set ${sparseDir}`,
+          `  ${repoUrl}.git $_tmp`,
+          `git -C $_tmp sparse-checkout set ${sparseDir}`,
         ].join('\n'),
         language: 'shell',
       },
