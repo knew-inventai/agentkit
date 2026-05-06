@@ -38,7 +38,7 @@ function singleFileInstallCommands(
       title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
       command: [
         cloneCmd,
-        `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+        `git -C /tmp/${repo} sparse-checkout set ${name}`,
         `mkdir -p $(dirname ${destPath})`,
         `cp /tmp/${repo}/${name}/${srcFile} ${destPath}`,
       ].join('\n'),
@@ -112,7 +112,7 @@ export function getInstallCommands(
         command: [
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git /tmp/${repo}`,
-          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+          `git -C /tmp/${repo} sparse-checkout set ${name}`,
           `mkdir -p ${pluginDir}`,
           `cp -r ${name}/. ${pluginDir}/`,
         ].join('\n'),
@@ -167,7 +167,7 @@ export function getInstallCommands(
         command: [
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git /tmp/${repo}`,
-          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+          `git -C /tmp/${repo} sparse-checkout set ${name}`,
           `mkdir -p ${pluginDir}`,
           `cp -r ${name}/. ${pluginDir}/`,
         ].join('\n'),
@@ -233,7 +233,7 @@ export function getInstallCommands(
         command: [
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git /tmp/${repo}`,
-          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+          `git -C /tmp/${repo} sparse-checkout set ${name}`,
           `mkdir -p ${pluginDir}`,
           `cp -r ${name}/. ${pluginDir}/`,
         ].join('\n'),
@@ -290,7 +290,7 @@ export function getInstallCommands(
         command: [
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git ~/Downloads/${repo}`,
-          `cd ~/Downloads/${repo} && git sparse-checkout set ${sparseDir}`,
+          `git -C ~/Downloads/${repo} sparse-checkout set ${sparseDir}`,
         ].join('\n'),
         language: 'shell',
       },
