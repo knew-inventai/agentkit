@@ -18,14 +18,13 @@ function singleFileInstallCommands(
   repoUrl: string,
   repo: string,
   name: string,
-  destPath: string,   // full local destination path
-  srcFile: string,    // filename inside the repo dir (e.g. SKILL.md)
+  destPath: string,
+  srcFile: string,
   version?: string,
 ): InstallCommand[] {
-  const tmpDir = `/tmp/${repo}-$(date +%s)`
   const cloneCmd = version
-    ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git ${tmpDir}`
-    : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git ${tmpDir}`
+    ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git $_tmp`
+    : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git $_tmp`
   const browseUrl = version
     ? `${repoUrl}/blob/${name}%40${version}/${name}/${srcFile}`
     : `${repoUrl}/blob/main/${name}/${srcFile}`
@@ -33,6 +32,17 @@ function singleFileInstallCommands(
     {
       title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
       command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${destPath}`,
+      language: 'shell',
+    },
+    {
+      title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
+      command: [
+        `_tmp="/tmp/${repo}-$(date +%s)"`,
+        cloneCmd,
+        `git -C $_tmp sparse-checkout set ${name}`,
+        `mkdir -p $(dirname ${destPath})`,
+        `cp $_tmp/${name}/${srcFile} ${destPath}`,
+      ].join('\n'),
       language: 'shell',
     },
     {
