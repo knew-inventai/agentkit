@@ -32,6 +32,12 @@ export default function BrowsePage() {
     return () => clearTimeout(t)
   }, [searchInput]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Sync searchInput when ?q= param changes (e.g. clicking a tag while already on this page)
+  useEffect(() => {
+    const q = searchParams.get('q') ?? ''
+    setSearchInput(q)
+  }, [searchParams])
+
   return (
     <Layout>
       {/* Search bar */}
