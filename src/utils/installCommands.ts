@@ -16,7 +16,6 @@ export interface InstallCommand {
 function singleFileInstallCommands(
   rawUrl: string,
   repoUrl: string,
-  repo: string,
   name: string,
   destPath: string,
   srcFile: string,
@@ -74,18 +73,18 @@ export function getInstallCommands(
       const destPath = scope === 'global'
         ? `~/.copilot/skills/${name}/SKILL.md`
         : `.github/skills/${name}/SKILL.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'SKILL.md', version)
+      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
     }
     if (type === 'agent') {
       const destPath = scope === 'global'
         ? `~/.copilot/agents/${name}.md`
         : `.github/agents/${name}.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'AGENT.md', version)
+      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
     }
     if (type === 'mcp') {
       const destPath = `~/Downloads/${name}.json`
       return [
-        ...singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'mcp-config.json', version),
+        ...singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'mcp-config.json', version),
         {
           title: '設定整合',
           command: `# 下載後，將 ${name}.json 的內容\n# 加入 VS Code Copilot 的 MCP 設定`,
@@ -132,19 +131,19 @@ export function getInstallCommands(
       const destPath = scope === 'global'
         ? `~/.claude/skills/${name}/SKILL.md`
         : `.claude/skills/${name}/SKILL.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'SKILL.md', version)
+      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
     }
     if (type === 'agent') {
       const destPath = scope === 'global'
         ? `~/.claude/agents/${name}.md`
         : `.claude/agents/${name}.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'AGENT.md', version)
+      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
     }
     if (type === 'mcp') {
       const configDir = scope === 'global' ? `~/.claude/mcp-configs` : `.claude/mcp-configs`
       const destPath = `${configDir}/${name}.json`
       return [
-        ...singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'mcp-config.json', version),
+        ...singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'mcp-config.json', version),
         {
           title: '設定整合',
           command: `# 將 ${destPath} 的內容\n# 合併至 ~/.claude/settings.json 的 "mcpServers" 欄位`,
@@ -188,7 +187,7 @@ export function getInstallCommands(
       const destPath = scope === 'global'
         ? `~/.agents/skills/${name}/SKILL.md`
         : `.agents/skills/${name}/SKILL.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'SKILL.md', version)
+      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
     }
     if (type === 'agent') {
       // Codex subagents use TOML format — incompatible with AgentKit AGENT.md
@@ -208,7 +207,7 @@ export function getInstallCommands(
     if (type === 'mcp') {
       const destPath = `~/Downloads/${name}.json`
       return [
-        ...singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'mcp-config.json', version),
+        ...singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'mcp-config.json', version),
         {
           title: '設定整合',
           command: `# 下載後，將 ${name}.json 的內容\n# 加入 ~/.codex/config.toml 的 [[mcp_servers]] 區塊`,
@@ -273,14 +272,14 @@ export function getInstallCommands(
 
   if (type === 'agent') {
     return singleFileInstallCommands(
-      rawUrl, repoUrl, repo, name,
+      rawUrl, repoUrl, name,
       `~/Downloads/${name}.md`, 'AGENT.md', version,
     )
   }
 
   if (type === 'mcp') {
     return singleFileInstallCommands(
-      rawUrl, repoUrl, repo, name,
+      rawUrl, repoUrl, name,
       `~/Downloads/${name}.json`, 'mcp-config.json', version,
     )
   }
@@ -292,7 +291,7 @@ export function getInstallCommands(
       {
         title: 'git sparse-checkout（推薦）',
         command: [
-          `_tmp="$HOME/Downloads/${repo}-$(date +%s)"`,
+          `_tmp=$(mktemp -d)`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git $_tmp`,
           `git -C $_tmp sparse-checkout set ${sparseDir}`,
