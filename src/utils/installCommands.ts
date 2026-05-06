@@ -37,21 +37,11 @@ function singleFileInstallCommands(
     {
       title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
       command: [
-        `_tmp="/tmp/${repo}-$(date +%s)"`,
+        `_tmp=$(mktemp -d)`,
         cloneCmd,
         `git -C $_tmp sparse-checkout set ${name}`,
         `mkdir -p $(dirname ${destPath})`,
         `cp $_tmp/${name}/${srcFile} ${destPath}`,
-      ].join('\n'),
-      language: 'shell',
-    },
-    {
-      title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
-      command: [
-        cloneCmd,
-        `git -C ${tmpDir} sparse-checkout set ${name}`,
-        `mkdir -p $(dirname ${destPath})`,
-        `cp ${tmpDir}/${name}/${srcFile} ${destPath}`,
       ].join('\n'),
       language: 'shell',
     },
