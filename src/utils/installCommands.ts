@@ -9,25 +9,29 @@ export interface InstallCommand {
   language: 'shell'
 }
 
-/** Shared: curl > git sparse > browser for skill type */
-function skillInstallCommands(
+/**
+ * Shared: curl > git sparse-checkout > browser
+ * Used for skill (SKILL.md), agent (AGENT.md), mcp (mcp-config.json)
+ */
+function singleFileInstallCommands(
   rawUrl: string,
   repoUrl: string,
   repo: string,
   name: string,
-  skillPath: string,
+  destPath: string,   // full local destination path
+  srcFile: string,    // filename inside the repo dir (e.g. SKILL.md)
   version?: string,
 ): InstallCommand[] {
   const cloneCmd = version
     ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
     : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
   const browseUrl = version
-    ? `${repoUrl}/blob/${name}%40${version}/${name}/SKILL.md`
-    : `${repoUrl}/blob/main/${name}/SKILL.md`
+    ? `${repoUrl}/blob/${name}%40${version}/${name}/${srcFile}`
+    : `${repoUrl}/blob/main/${name}/${srcFile}`
   return [
     {
       title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
-      command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
+      command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${destPath}`,
       language: 'shell',
     },
     {
@@ -35,14 +39,14 @@ function skillInstallCommands(
       command: [
         cloneCmd,
         `cd /tmp/${repo} && git sparse-checkout set ${name}`,
-        `mkdir -p $(dirname ${skillPath})`,
-        `cp /tmp/${repo}/${name}/SKILL.md ${skillPath}`,
+        `mkdir -p $(dirname ${destPath})`,
+        `cp /tmp/${repo}/${name}/${srcFile} ${destPath}`,
       ].join('\n'),
       language: 'shell',
     },
     {
       title: '方式三：瀏覽器',
-      command: `# 開啟後手動另存新檔至：\n# ${skillPath}\n# ${browseUrl}`,
+      command: `# 開啟後手動另存新檔至：\n# ${destPath}\n# ${browseUrl}`,
       language: 'shell',
     },
   ]
@@ -66,19 +70,24 @@ export function getInstallCommands(
 
   if (tool === 'copilot') {
     if (type === 'skill') {
-      const skillPath = scope === 'global'
+      const destPath = scope === 'global'
         ? `~/.copilot/skills/${name}/SKILL.md`
         : `.github/skills/${name}/SKILL.md`
-      return skillInstallCommands(rawUrl, repoUrl, repo, name, skillPath, version)
+      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'SKILL.md', version)
     }
     if (type === 'agent') {
-      const agentPath = scope === 'global'
+      const destPath = scope === 'global'
         ? `~/.copilot/agents/${name}.md`
         : `.github/agents/${name}.md`
+      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'AGENT.md', version)
+    }
+    if (type === 'mcp') {
+      const destPath = `~/Downloads/${name}.json`
       return [
+        ...singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'mcp-config.json', version),
         {
-          title: version ? `curl 安裝 v${version}` : 'curl 安裝',
-          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${agentPath}`,
+          title: '設定整合',
+          command: `# 下載後，將 ${name}.json 的內容\n# 加入 VS Code Copilot 的 MCP 設定`,
           language: 'shell',
         },
       ]
@@ -111,21 +120,36 @@ export function getInstallCommands(
       })
       return commands
     }
-    if (type === 'mcp') {
-      return [
-        {
-          title: 'MCP 設定（手動）',
-          command: `# 下載設定檔後，加入 VS Code Copilot MCP 設定\ncurl -fsSL ${rawUrl} -o ~/Downloads/${name}.json`,
-          language: 'shell',
-        },
-      ]
-    }
     return []
   }
 
   // ─── Claude Code ──────────────────────────────────────
 
   if (tool === 'claude-code') {
+    if (type === 'skill') {
+      const destPath = scope === 'global'
+        ? `~/.claude/skills/${name}/SKILL.md`
+        : `.claude/skills/${name}/SKILL.md`
+      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'SKILL.md', version)
+    }
+    if (type === 'agent') {
+      const destPath = scope === 'global'
+        ? `~/.claude/agents/${name}.md`
+        : `.claude/agents/${name}.md`
+      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'AGENT.md', version)
+    }
+    if (type === 'mcp') {
+      const configDir = scope === 'global' ? `~/.claude/mcp-configs` : `.claude/mcp-configs`
+      const destPath = `${configDir}/${name}.json`
+      return [
+        ...singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'mcp-config.json', version),
+        {
+          title: '設定整合',
+          command: `# 將 ${destPath} 的內容\n# 合併至 ~/.claude/settings.json 的 "mcpServers" 欄位`,
+          language: 'shell',
+        },
+      ]
+    }
     if (type === 'plugin') {
       const pluginDir = scope === 'global'
         ? `~/.claude/plugins/${repo}/${name}`
@@ -151,63 +175,43 @@ export function getInstallCommands(
       })
       return commands
     }
-    if (type === 'mcp') {
-      const configDir = scope === 'global'
-        ? `~/.claude/mcp-configs`
-        : `.claude/mcp-configs`
-      return [
-        {
-          title: '步驟 1：下載 MCP 設定檔',
-          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${configDir}/${name}.json`,
-          language: 'shell',
-        },
-        {
-          title: '步驟 2：加入 Claude Code settings',
-          command: `# 將 ${configDir}/${name}.json 的內容\n# 合併至 ~/.claude/settings.json 的 "mcpServers" 欄位`,
-          language: 'shell',
-        },
-      ]
-    }
-    if (type === 'agent') {
-      const agentPath = scope === 'global'
-        ? `~/.claude/agents/${name}.md`
-        : `.claude/agents/${name}.md`
-      const cloneCmd = version
-        ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
-        : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
-      return [
-        {
-          title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
-          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${agentPath}`,
-          language: 'shell',
-        },
-        {
-          title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
-          command: [
-            cloneCmd,
-            `cd /tmp/${repo} && git sparse-checkout set ${name}`,
-            `mkdir -p $(dirname ${agentPath})`,
-            `cp /tmp/${repo}/${name}/AGENT.md ${agentPath}`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
-    // skill
-    const skillPath = scope === 'global'
-      ? `~/.claude/skills/${name}/SKILL.md`
-      : `.claude/skills/${name}/SKILL.md`
-    return skillInstallCommands(rawUrl, repoUrl, repo, name, skillPath, version)
+    return []
   }
 
   // ─── OpenAI Codex ─────────────────────────────────────
 
   if (tool === 'codex') {
     if (type === 'skill') {
-      const skillPath = scope === 'global'
+      const destPath = scope === 'global'
         ? `~/.agents/skills/${name}/SKILL.md`
         : `.agents/skills/${name}/SKILL.md`
-      return skillInstallCommands(rawUrl, repoUrl, repo, name, skillPath, version)
+      return singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'SKILL.md', version)
+    }
+    if (type === 'agent') {
+      // Codex subagents use TOML format — incompatible with AgentKit AGENT.md
+      return [
+        {
+          title: '格式不相容（僅供參考）',
+          command: [
+            `# Codex subagent 使用 TOML 格式（.codex/agents/<name>.toml）`,
+            `# AgentKit 的 AGENT.md 為 Markdown 格式，需手動轉換`,
+            `# 原始檔案下載：`,
+            `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.md`,
+          ].join('\n'),
+          language: 'shell',
+        },
+      ]
+    }
+    if (type === 'mcp') {
+      const destPath = `~/Downloads/${name}.json`
+      return [
+        ...singleFileInstallCommands(rawUrl, repoUrl, repo, name, destPath, 'mcp-config.json', version),
+        {
+          title: '設定整合',
+          command: `# 下載後，將 ${name}.json 的內容\n# 加入 ~/.codex/config.toml 的 [[mcp_servers]] 區塊`,
+          language: 'shell',
+        },
+      ]
     }
     if (type === 'plugin') {
       const commands: InstallCommand[] = []
@@ -237,29 +241,6 @@ export function getInstallCommands(
       })
       return commands
     }
-    if (type === 'mcp') {
-      return [
-        {
-          title: 'MCP 設定（手動）',
-          command: `# 下載設定檔後，加入 ~/.codex/config.toml 的 [[mcp_servers]] 區塊\ncurl -fsSL ${rawUrl} -o ~/Downloads/${name}.json`,
-          language: 'shell',
-        },
-      ]
-    }
-    if (type === 'agent') {
-      return [
-        {
-          title: '格式不相容（僅供參考）',
-          command: [
-            `# Codex subagent 使用 TOML 格式（.codex/agents/<name>.toml）`,
-            `# AgentKit 的 AGENT.md 為 Markdown 格式，需手動轉換`,
-            `# 原始檔案下載：`,
-            `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.md`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
     return []
   }
 
@@ -286,6 +267,20 @@ export function getInstallCommands(
     ]
   }
 
+  if (type === 'agent') {
+    return singleFileInstallCommands(
+      rawUrl, repoUrl, repo, name,
+      `~/Downloads/${name}.md`, 'AGENT.md', version,
+    )
+  }
+
+  if (type === 'mcp') {
+    return singleFileInstallCommands(
+      rawUrl, repoUrl, repo, name,
+      `~/Downloads/${name}.json`, 'mcp-config.json', version,
+    )
+  }
+
   if (type === 'plugin') {
     const ref = version ? `${name}@${version}` : 'main'
     const sparseDir = version ? `${name}@${version}` : name
@@ -307,17 +302,5 @@ export function getInstallCommands(
     ]
   }
 
-  const ext = type === 'mcp' ? 'json' : 'md'
-  return [
-    {
-      title: version ? `curl 下載 v${version}` : 'curl 下載',
-      command: `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.${ext}`,
-      language: 'shell',
-    },
-    {
-      title: version ? `wget 下載 v${version}` : 'wget 下載',
-      command: `wget -q ${rawUrl} -O ~/Downloads/${name}.${ext}`,
-      language: 'shell',
-    },
-  ]
+  return []
 }
