@@ -264,13 +264,21 @@ export function getInstallCommands(
   // ─── 通用下載 ─────────────────────────────────────────
 
   if (type === 'plugin') {
-    const treeUrl = version
-      ? `${repoUrl}/tree/${name}%40${version}/${name}`
-      : `${repoUrl}/tree/main/${name}`
+    const ref = version ? `${name}@${version}` : 'main'
+    const sparseDir = version ? `${name}@${version}` : name
     return [
       {
-        title: 'GitHub 原始碼',
-        command: `# 開啟瀏覽器查看：\n# ${treeUrl}`,
+        title: 'git sparse-checkout（推薦）',
+        command: [
+          `git clone --depth=1 --filter=blob:none --sparse \\`,
+          `  ${repoUrl}.git ~/Downloads/${repo}`,
+          `cd ~/Downloads/${repo} && git sparse-checkout set ${sparseDir}`,
+        ].join('\n'),
+        language: 'shell',
+      },
+      {
+        title: '瀏覽器（手動下載）',
+        command: `# 開啟後逐一下載所需檔案：\n# ${repoUrl}/tree/${ref}/${name}`,
         language: 'shell',
       },
     ]
@@ -279,8 +287,13 @@ export function getInstallCommands(
   const ext = type === 'mcp' ? 'json' : 'md'
   return [
     {
-      title: version ? `下載 v${version} 到本機` : '下載到本機',
+      title: version ? `curl 下載 v${version}` : 'curl 下載',
       command: `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.${ext}`,
+      language: 'shell',
+    },
+    {
+      title: version ? `wget 下載 v${version}` : 'wget 下載',
+      command: `wget -q ${rawUrl} -O ~/Downloads/${name}.${ext}`,
       language: 'shell',
     },
   ]
