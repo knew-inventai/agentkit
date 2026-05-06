@@ -9,6 +9,45 @@ export interface InstallCommand {
   language: 'shell'
 }
 
+/** Shared: curl > git sparse > browser for skill type */
+function skillInstallCommands(
+  rawUrl: string,
+  repoUrl: string,
+  repo: string,
+  name: string,
+  skillPath: string,
+  version?: string,
+): InstallCommand[] {
+  const cloneCmd = version
+    ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
+    : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
+  const browseUrl = version
+    ? `${repoUrl}/blob/${name}%40${version}/${name}/SKILL.md`
+    : `${repoUrl}/blob/main/${name}/SKILL.md`
+  return [
+    {
+      title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
+      command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
+      language: 'shell',
+    },
+    {
+      title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
+      command: [
+        cloneCmd,
+        `cd /tmp/${repo} && git sparse-checkout set ${name}`,
+        `mkdir -p $(dirname ${skillPath})`,
+        `cp /tmp/${repo}/${name}/SKILL.md ${skillPath}`,
+      ].join('\n'),
+      language: 'shell',
+    },
+    {
+      title: '方式三：瀏覽器',
+      command: `# 開啟後手動另存新檔至：\n# ${skillPath}\n# ${browseUrl}`,
+      language: 'shell',
+    },
+  ]
+}
+
 export function getInstallCommands(
   tool: InstallTool,
   scope: InstallScope,
@@ -27,24 +66,10 @@ export function getInstallCommands(
 
   if (tool === 'copilot') {
     if (type === 'skill') {
-      const installCmd = version
-        ? `gh skill install ${ORG}/${repo} ${name}@${version} ${scopeFlag}`
-        : `gh skill install ${ORG}/${repo} ${name} ${scopeFlag}`
-      return [
-        {
-          title: '方式一：gh skill 指令（推薦）',
-          command: installCmd,
-          language: 'shell',
-        },
-        {
-          title: '方式二：手動安裝',
-          command: [
-            `curl -fsSL ${rawUrl} \\`,
-            `  --create-dirs -o ${scope === 'global' ? '~/.copilot' : '.github'}/skills/${name}/SKILL.md`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
+      const skillPath = scope === 'global'
+        ? `~/.copilot/skills/${name}/SKILL.md`
+        : `.github/skills/${name}/SKILL.md`
+      return skillInstallCommands(rawUrl, repoUrl, repo, name, skillPath, version)
     }
     if (type === 'agent') {
       const agentPath = scope === 'global'
@@ -172,26 +197,7 @@ export function getInstallCommands(
     const skillPath = scope === 'global'
       ? `~/.claude/skills/${name}/SKILL.md`
       : `.claude/skills/${name}/SKILL.md`
-    const cloneCmd = version
-      ? `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
-      : `git clone --depth=1 --filter=blob:none --sparse \\\n  ${repoUrl}.git /tmp/${repo}`
-    return [
-      {
-        title: version ? `curl 安裝 v${version}` : '方式一：curl 安裝',
-        command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
-        language: 'shell',
-      },
-      {
-        title: version ? `git sparse-checkout v${version}` : '方式二：git sparse-checkout',
-        command: [
-          cloneCmd,
-          `cd /tmp/${repo} && git sparse-checkout set ${name}`,
-          `mkdir -p $(dirname ${skillPath})`,
-          `cp /tmp/${repo}/${name}/SKILL.md ${skillPath}`,
-        ].join('\n'),
-        language: 'shell',
-      },
-    ]
+    return skillInstallCommands(rawUrl, repoUrl, repo, name, skillPath, version)
   }
 
   // ─── OpenAI Codex ─────────────────────────────────────
@@ -201,13 +207,7 @@ export function getInstallCommands(
       const skillPath = scope === 'global'
         ? `~/.agents/skills/${name}/SKILL.md`
         : `.agents/skills/${name}/SKILL.md`
-      return [
-        {
-          title: version ? `curl 安裝 v${version}` : 'curl 安裝',
-          command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
-          language: 'shell',
-        },
-      ]
+      return skillInstallCommands(rawUrl, repoUrl, repo, name, skillPath, version)
     }
     if (type === 'plugin') {
       const commands: InstallCommand[] = []
