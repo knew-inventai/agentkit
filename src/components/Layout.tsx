@@ -34,7 +34,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/" className="text-xl font-bold text-gray-900 dark:text-gray-100">AgentKit</Link>
           <nav className="flex items-center gap-6">
             <Link to="/browse" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">瀏覽</Link>
-            <Link to="/search" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">搜尋</Link>
             {auth.token && (
               <Link to="/liked" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">🔖 收藏</Link>
             )}

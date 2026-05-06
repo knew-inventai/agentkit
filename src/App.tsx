@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import BrowsePage from './pages/BrowsePage'
-import SearchPage from './pages/SearchPage'
 import DetailPage from './pages/DetailPage'
 import PublishPage from './pages/PublishPage'
 import DocsPage from './pages/DocsPage'
@@ -14,7 +13,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/browse" element={<BrowsePage />} />
-        <Route path="/search" element={<SearchPage />} />
         <Route path="/publish" element={<PublishPage />} />
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/liked" element={<LikedPage />} />

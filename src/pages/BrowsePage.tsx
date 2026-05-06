@@ -39,6 +39,7 @@ export default function BrowsePage() {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="搜尋工具名稱、描述、標籤..."
+          autoFocus
           className="w-full rounded-lg border px-4 py-2 text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
