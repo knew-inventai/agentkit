@@ -142,8 +142,8 @@ export function getInstallCommands(
         {
           title: 'plugin install',
           command: [
-            `/plugin marketplace add ${ORG}/${repo}`,
-            `/plugin install ${name}@agentkit-plugins`,
+            `claude plugin marketplace add ${ORG}/${repo}`,
+            `claude plugin install ${name}@agentkit-plugins`,
           ].join('\n'),
           language: 'shell',
         },
