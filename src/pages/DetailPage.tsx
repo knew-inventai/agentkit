@@ -104,9 +104,13 @@ export default function DetailPage() {
             <p className="mt-1 text-gray-500 dark:text-gray-400">{manifest.description}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {manifest._agentkit?.tags.map((tag) => (
-                <span key={tag} className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                <Link
+                  key={tag}
+                  to={`/browse?q=${encodeURIComponent(tag)}`}
+                  className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+                >
                   {tag}
-                </span>
+                </Link>
               ))}
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { usePackages } from '../hooks/usePackages'
 import Layout from '../components/Layout'
@@ -15,6 +16,7 @@ const TYPES: { id: PackageType | 'all'; label: string }[] = [
 
 export default function BrowsePage() {
   const { auth } = useAuth()
+  const [searchParams] = useSearchParams()
   const {
     packages, stats, total, isLoading, error,
     hasMore, loadMore,
@@ -24,7 +26,7 @@ export default function BrowsePage() {
   } = usePackages(auth.token ?? undefined)
 
   // Debounced search: local input state, push to hook after 300ms idle
-  const [searchInput, setSearchInput] = useState(query)
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('q') ?? query)
   useEffect(() => {
     const t = setTimeout(() => setQuery(searchInput), 300)
     return () => clearTimeout(t)

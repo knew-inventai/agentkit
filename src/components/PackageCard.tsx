@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Package, PackageStats } from '../types'
 
 const TYPE_BADGE: Record<string, string> = {
@@ -14,10 +14,11 @@ interface Props {
 }
 
 export default function PackageCard({ pkg, stats }: Props) {
+  const navigate = useNavigate()
   return (
-    <Link
-      to={`/${pkg.type}/${pkg.name}`}
-      className="block rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition-shadow"
+    <div
+      onClick={() => navigate(`/${pkg.type}/${pkg.name}`)}
+      className="block rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
@@ -30,9 +31,14 @@ export default function PackageCard({ pkg, stats }: Props) {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{pkg.description}</p>
           <div className="mt-2 flex flex-wrap gap-1">
             {pkg.tags.slice(0, 4).map((tag) => (
-              <span key={tag} className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+              <Link
+                key={tag}
+                to={`/browse?q=${encodeURIComponent(tag)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-500 dark:text-gray-400 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+              >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -44,6 +50,6 @@ export default function PackageCard({ pkg, stats }: Props) {
           <span className="ml-auto">v{pkg.version}</span>
         </div>
       )}
-    </Link>
+    </div>
   )
 }
