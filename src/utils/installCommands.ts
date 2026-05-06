@@ -110,7 +110,7 @@ export function getInstallCommands(
       commands.push({
         title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
         command: [
-          `_tmp="/tmp/${repo}-$(date +%s)"`,
+          `_tmp=$(mktemp -d)`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git $_tmp`,
           `git -C $_tmp sparse-checkout set ${name}`,
@@ -166,7 +166,7 @@ export function getInstallCommands(
       commands.push({
         title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
         command: [
-          `_tmp="/tmp/${repo}-$(date +%s)"`,
+          `_tmp=$(mktemp -d)`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git $_tmp`,
           `git -C $_tmp sparse-checkout set ${name}`,
@@ -233,7 +233,7 @@ export function getInstallCommands(
       commands.push({
         title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
         command: [
-          `_tmp="/tmp/${repo}-$(date +%s)"`,
+          `_tmp=$(mktemp -d)`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git $_tmp`,
           `git -C $_tmp sparse-checkout set ${name}`,
