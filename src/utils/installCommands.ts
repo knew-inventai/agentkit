@@ -82,12 +82,10 @@ export function getInstallCommands(
       return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
     }
     if (type === 'mcp') {
-      const destPath = `~/Downloads/${name}.json`
       return [
-        ...singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'mcp-config.json', version),
         {
-          title: '設定整合',
-          command: `# 下載後，將 ${name}.json 的內容\n# 加入 VS Code Copilot 的 MCP 設定`,
+          title: '設定',
+          command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入\n#    VS Code → Settings → Copilot MCP Servers`,
           language: 'shell',
         },
       ]
@@ -140,13 +138,10 @@ export function getInstallCommands(
       return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
     }
     if (type === 'mcp') {
-      const configDir = scope === 'global' ? `~/.claude/mcp-configs` : `.claude/mcp-configs`
-      const destPath = `${configDir}/${name}.json`
       return [
-        ...singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'mcp-config.json', version),
         {
-          title: '設定整合',
-          command: `# 將 ${destPath} 的內容\n# 合併至 ~/.claude/settings.json 的 "mcpServers" 欄位`,
+          title: '設定',
+          command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入\n#    ~/.claude/settings.json 的 "mcpServers" 欄位`,
           language: 'shell',
         },
       ]
@@ -205,12 +200,10 @@ export function getInstallCommands(
       ]
     }
     if (type === 'mcp') {
-      const destPath = `~/Downloads/${name}.json`
       return [
-        ...singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'mcp-config.json', version),
         {
-          title: '設定整合',
-          command: `# 下載後，將 ${name}.json 的內容\n# 加入 ~/.codex/config.toml 的 [[mcp_servers]] 區塊`,
+          title: '設定',
+          command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入\n#    ~/.codex/config.toml 的 [[mcp_servers]] 區塊`,
           language: 'shell',
         },
       ]
@@ -278,10 +271,13 @@ export function getInstallCommands(
   }
 
   if (type === 'mcp') {
-    return singleFileInstallCommands(
-      rawUrl, repoUrl, name,
-      `~/Downloads/${name}.json`, 'mcp-config.json', version,
-    )
+    return [
+      {
+        title: '設定',
+        command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入你的 MCP config`,
+        language: 'shell',
+      },
+    ]
   }
 
   if (type === 'plugin') {
