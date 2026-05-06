@@ -210,7 +210,7 @@ export function getInstallCommands(
   name: string,
   version?: string,
 ): InstallCommand[] {
-  const repo = `agentkit-${type}s`
+  const repo = type === 'mcp' ? 'agentkit-mcp' : `agentkit-${type}s`
   const repoUrl = `https://github.com/${ORG}/${repo}`
   const rawUrl = version
     ? getRawFileUrlAtTag(type, name, version)
