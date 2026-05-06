@@ -166,20 +166,13 @@ export function getInstallCommands(
     const skillPath = scope === 'global'
       ? `~/.claude/skills/${name}/SKILL.md`
       : `.claude/skills/${name}/SKILL.md`
-    const commands: InstallCommand[] = []
-    if (!version) {
-      commands.push({
-        title: '方式一：Claude Code Marketplace（推薦）',
-        command: `/plugin marketplace add ${ORG}/${repo}\n/plugin install ${name}@${repo}`,
+    return [
+      {
+        title: version ? `curl 安裝 v${version}` : 'curl 安裝',
+        command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
         language: 'shell',
-      })
-    }
-    commands.push({
-      title: version ? `curl 安裝 v${version}` : '方式二：curl 手動安裝',
-      command: `curl -fsSL ${rawUrl} \\\n  --create-dirs -o ${skillPath}`,
-      language: 'shell',
-    })
-    return commands
+      },
+    ]
   }
 
   // ─── OpenAI Codex ─────────────────────────────────────
