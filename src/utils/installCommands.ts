@@ -102,29 +102,23 @@ export function getInstallCommands(
       const commands: InstallCommand[] = []
       if (!version) {
         commands.push({
-          title: '方式一：copilot plugin 指令（推薦）',
+          title: 'copilot plugin install（推薦）',
+          command: `copilot plugin install ${ORG}/${repo}:${name}`,
+          language: 'shell',
+        })
+      } else {
+        commands.push({
+          title: `copilot plugin install v${version}`,
           command: [
-            `copilot plugin marketplace add ${ORG}/${repo}`,
-            `copilot plugin install ${name}@${repo}`,
+            `_tmp=$(mktemp -d)`,
+            `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\`,
+            `  ${repoUrl}.git $_tmp`,
+            `git -C $_tmp sparse-checkout set ${name}@${version}`,
+            `copilot plugin install $_tmp/${name}@${version}`,
           ].join('\n'),
           language: 'shell',
         })
       }
-      const pluginDir = scope === 'global'
-        ? `~/.copilot/plugins/${name}`
-        : `.github/plugins/${name}`
-      commands.push({
-        title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
-        command: [
-          `_tmp=$(mktemp -d)`,
-          `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git $_tmp`,
-          `git -C $_tmp sparse-checkout set ${name}`,
-          `mkdir -p ${pluginDir}`,
-          `cp -r $_tmp/${name}/. ${pluginDir}/`,
-        ].join('\n'),
-        language: 'shell',
-      })
       return commands
     }
     return []
