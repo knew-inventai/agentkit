@@ -245,14 +245,21 @@ export default function PublishPage() {
             </div>
           </div>
           <div>
-            <label className={labelClass}>描述（100 字以內）</label>
+            <div className="flex items-baseline justify-between">
+              <label className={labelClass}>描述</label>
+              <span className={`text-xs ${form.description.length > 90 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                {form.description.length}/100
+              </span>
+            </div>
             <input
               required
               maxLength={100}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               className={inputClass}
+              placeholder="一句話說明用途，例：自動審查程式碼並找出潛在的 bug 與安全問題"
             />
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">顯示在瀏覽頁卡片與搜尋結果中</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -324,6 +331,7 @@ export default function PublishPage() {
               className={`${inputClass} font-mono`}
               placeholder="說明文件（Markdown 格式）..."
             />
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">詳細說明文件，顯示在工具詳情頁主體</p>
           </div>
           <button
             type="submit"
