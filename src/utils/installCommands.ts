@@ -99,27 +99,16 @@ export function getInstallCommands(
       ]
     }
     if (type === 'plugin') {
-      const commands: InstallCommand[] = []
-      if (!version) {
-        commands.push({
-          title: 'copilot plugin install（推薦）',
-          command: `copilot plugin install ${ORG}/${repo}:${name}`,
-          language: 'shell',
-        })
-      } else {
-        commands.push({
-          title: `copilot plugin install v${version}`,
+      return [
+        {
+          title: 'plugin install',
           command: [
-            `_tmp=$(mktemp -d)`,
-            `git clone --depth=1 --branch ${name}@${version} --filter=blob:none --sparse \\`,
-            `  ${repoUrl}.git $_tmp`,
-            `git -C $_tmp sparse-checkout set ${name}@${version}`,
-            `copilot plugin install $_tmp/${name}@${version}`,
+            `copilot plugin marketplace add ${ORG}/${repo}`,
+            `copilot plugin install ${name}@agentkit-plugins`,
           ].join('\n'),
           language: 'shell',
-        })
-      }
-      return commands
+        },
+      ]
     }
     return []
   }
@@ -149,30 +138,16 @@ export function getInstallCommands(
       ]
     }
     if (type === 'plugin') {
-      const pluginDir = scope === 'global'
-        ? `~/.claude/plugins/${repo}/${name}`
-        : `.claude/plugins/${repo}/${name}`
-      const commands: InstallCommand[] = []
-      if (!version) {
-        commands.push({
-          title: '方式一：/plugin 指令（推薦）',
-          command: `/plugin marketplace add ${ORG}/${repo}\n/plugin install ${name}@${repo}`,
+      return [
+        {
+          title: 'plugin install',
+          command: [
+            `/plugin marketplace add ${ORG}/${repo}`,
+            `/plugin install ${name}@agentkit-plugins`,
+          ].join('\n'),
           language: 'shell',
-        })
-      }
-      commands.push({
-        title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
-        command: [
-          `_tmp=$(mktemp -d)`,
-          `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git $_tmp`,
-          `git -C $_tmp sparse-checkout set ${name}`,
-          `mkdir -p ${pluginDir}`,
-          `cp -r $_tmp/${name}/. ${pluginDir}/`,
-        ].join('\n'),
-        language: 'shell',
-      })
-      return commands
+        },
+      ]
     }
     return []
   }
@@ -211,33 +186,16 @@ export function getInstallCommands(
       ]
     }
     if (type === 'plugin') {
-      const commands: InstallCommand[] = []
-      if (!version) {
-        commands.push({
-          title: '方式一：codex plugin marketplace 指令（推薦）',
+      return [
+        {
+          title: 'plugin install',
           command: [
             `codex plugin marketplace add ${ORG}/${repo}`,
-            `# 然後在 Codex Plugin Directory 中安裝 ${name}`,
+            `codex plugin install ${name}@agentkit-plugins`,
           ].join('\n'),
           language: 'shell',
-        })
-      }
-      const pluginDir = scope === 'global'
-        ? `~/.codex/plugins/${name}`
-        : `.agents/plugins/${name}`
-      commands.push({
-        title: version ? `git 安裝 v${version}` : '方式二：git 手動安裝',
-        command: [
-          `_tmp=$(mktemp -d)`,
-          `git clone --depth=1 --filter=blob:none --sparse \\`,
-          `  ${repoUrl}.git $_tmp`,
-          `git -C $_tmp sparse-checkout set ${name}`,
-          `mkdir -p ${pluginDir}`,
-          `cp -r $_tmp/${name}/. ${pluginDir}/`,
-        ].join('\n'),
-        language: 'shell',
-      })
-      return commands
+        },
+      ]
     }
     return []
   }
@@ -283,22 +241,16 @@ export function getInstallCommands(
   }
 
   if (type === 'plugin') {
-    const ref = version ? `${name}@${version}` : 'main'
     const sparseDir = version ? `${name}@${version}` : name
     return [
       {
-        title: 'git sparse-checkout（推薦）',
+        title: 'git sparse-checkout',
         command: [
           `_tmp=$(mktemp -d)`,
           `git clone --depth=1 --filter=blob:none --sparse \\`,
           `  ${repoUrl}.git $_tmp`,
           `git -C $_tmp sparse-checkout set ${sparseDir}`,
         ].join('\n'),
-        language: 'shell',
-      },
-      {
-        title: '瀏覽器（手動下載）',
-        command: `# 開啟後逐一下載所需檔案：\n# ${repoUrl}/tree/${ref}/${name}`,
         language: 'shell',
       },
     ]
