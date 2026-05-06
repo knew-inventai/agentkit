@@ -9,10 +9,8 @@ export interface InstallCommand {
   language: 'shell'
 }
 
-/**
- * Shared: curl > git sparse-checkout > browser
- * Used for skill (SKILL.md), agent (AGENT.md), mcp (mcp-config.json)
- */
+// ── Shared low-level helper ───────────────────────────────
+
 function singleFileInstallCommands(
   rawUrl: string,
   repoUrl: string,
@@ -52,157 +50,67 @@ function singleFileInstallCommands(
   ]
 }
 
-export function getInstallCommands(
+// ── Tool-specific config tables ───────────────────────────
+
+const SKILL_DEST: Record<string, (scope: InstallScope, name: string) => string> = {
+  copilot:       (scope, name) => scope === 'global' ? `~/.copilot/skills/${name}/SKILL.md` : `.github/skills/${name}/SKILL.md`,
+  'claude-code': (scope, name) => scope === 'global' ? `~/.claude/skills/${name}/SKILL.md`  : `.claude/skills/${name}/SKILL.md`,
+  codex:         (scope, name) => scope === 'global' ? `~/.agents/skills/${name}/SKILL.md`  : `.agents/skills/${name}/SKILL.md`,
+}
+
+const AGENT_DEST: Record<string, (scope: InstallScope, name: string) => string> = {
+  copilot:       (scope, name) => scope === 'global' ? `~/.copilot/agents/${name}.md` : `.github/agents/${name}.md`,
+  'claude-code': (scope, name) => scope === 'global' ? `~/.claude/agents/${name}.md`  : `.claude/agents/${name}.md`,
+}
+
+const MCP_HINT: Record<string, (rawUrl: string) => string> = {
+  copilot: (rawUrl) => [
+    `# 設定檔內容：`,
+    `#   ${rawUrl}`,
+    `#`,
+    `# Copilot CLI：將 mcpServers 內容加入`,
+    `#   ~/.copilot/mcp-config.json`,
+    `#`,
+    `# VS Code：Settings → Copilot → MCP Servers`,
+  ].join('\n'),
+  'claude-code': (rawUrl) => [
+    `# 1. 開啟設定檔內容：`,
+    `#    ${rawUrl}`,
+    `# 2. 將 mcpServers 內容加入`,
+    `#    ~/.claude/settings.json 的 "mcpServers" 欄位`,
+  ].join('\n'),
+  codex: (rawUrl) => [
+    `# 1. 開啟設定檔內容：`,
+    `#    ${rawUrl}`,
+    `# 2. 將 mcpServers 內容加入`,
+    `#    ~/.codex/config.toml 的 [[mcp_servers]] 區塊`,
+  ].join('\n'),
+  download: (rawUrl) => [
+    `# 1. 開啟設定檔內容：`,
+    `#    ${rawUrl}`,
+    `# 2. 將 mcpServers 內容加入你的 MCP config`,
+  ].join('\n'),
+}
+
+const PLUGIN_CLI: Record<string, string> = {
+  copilot:       'copilot',
+  'claude-code': 'claude',
+  codex:         'codex',
+}
+
+// ── Per-type handlers ─────────────────────────────────────
+
+function skillCommands(
   tool: InstallTool,
   scope: InstallScope,
-  type: PackageType,
+  rawUrl: string,
+  repoUrl: string,
   name: string,
-  version?: string,
+  version: string | undefined,
+  repo: string,
+  scopeFlag: string,
 ): InstallCommand[] {
-  const repo = `agentkit-${type}s`
-  const repoUrl = `https://github.com/${ORG}/${repo}`
-  const rawUrl = version
-    ? getRawFileUrlAtTag(type, name, version)
-    : getRawFileUrl(type, name)
-  const scopeFlag = scope === 'global' ? '--scope user' : '--scope project'
-
-  // ─── GitHub Copilot ───────────────────────────────────
-
-  if (tool === 'copilot') {
-    if (type === 'skill') {
-      const destPath = scope === 'global'
-        ? `~/.copilot/skills/${name}/SKILL.md`
-        : `.github/skills/${name}/SKILL.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
-    }
-    if (type === 'agent') {
-      const destPath = scope === 'global'
-        ? `~/.copilot/agents/${name}.md`
-        : `.github/agents/${name}.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
-    }
-    if (type === 'mcp') {
-      return [
-        {
-          title: '設定',
-          command: [
-            `# 設定檔內容：`,
-            `#   ${rawUrl}`,
-            `#`,
-            `# Copilot CLI：將 mcpServers 內容加入`,
-            `#   ~/.copilot/mcp-config.json`,
-            `#`,
-            `# VS Code：Settings → Copilot → MCP Servers`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
-    if (type === 'plugin') {
-      return [
-        {
-          title: 'plugin install',
-          command: [
-            `copilot plugin marketplace add ${ORG}/${repo}`,
-            `copilot plugin install ${name}@agentkit-plugins`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
-    return []
-  }
-
-  // ─── Claude Code ──────────────────────────────────────
-
-  if (tool === 'claude-code') {
-    if (type === 'skill') {
-      const destPath = scope === 'global'
-        ? `~/.claude/skills/${name}/SKILL.md`
-        : `.claude/skills/${name}/SKILL.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
-    }
-    if (type === 'agent') {
-      const destPath = scope === 'global'
-        ? `~/.claude/agents/${name}.md`
-        : `.claude/agents/${name}.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
-    }
-    if (type === 'mcp') {
-      return [
-        {
-          title: '設定',
-          command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入\n#    ~/.claude/settings.json 的 "mcpServers" 欄位`,
-          language: 'shell',
-        },
-      ]
-    }
-    if (type === 'plugin') {
-      return [
-        {
-          title: 'plugin install',
-          command: [
-            `claude plugin marketplace add ${ORG}/${repo}`,
-            `claude plugin install ${name}@agentkit-plugins`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
-    return []
-  }
-
-  // ─── OpenAI Codex ─────────────────────────────────────
-
-  if (tool === 'codex') {
-    if (type === 'skill') {
-      const destPath = scope === 'global'
-        ? `~/.agents/skills/${name}/SKILL.md`
-        : `.agents/skills/${name}/SKILL.md`
-      return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
-    }
-    if (type === 'agent') {
-      // Codex subagents use TOML format — incompatible with AgentKit AGENT.md
-      return [
-        {
-          title: '格式不相容（僅供參考）',
-          command: [
-            `# Codex subagent 使用 TOML 格式（.codex/agents/<name>.toml）`,
-            `# AgentKit 的 AGENT.md 為 Markdown 格式，需手動轉換`,
-            `# 原始檔案下載：`,
-            `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.md`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
-    if (type === 'mcp') {
-      return [
-        {
-          title: '設定',
-          command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入\n#    ~/.codex/config.toml 的 [[mcp_servers]] 區塊`,
-          language: 'shell',
-        },
-      ]
-    }
-    if (type === 'plugin') {
-      return [
-        {
-          title: 'plugin install',
-          command: [
-            `codex plugin marketplace add ${ORG}/${repo}`,
-            `codex plugin install ${name}@agentkit-plugins`,
-          ].join('\n'),
-          language: 'shell',
-        },
-      ]
-    }
-    return []
-  }
-
-  // ─── 通用下載 ─────────────────────────────────────────
-
-  if (type === 'skill') {
+  if (tool === 'download') {
     const target = version ? `${name}@${version}` : name
     return [
       {
@@ -222,25 +130,50 @@ export function getInstallCommands(
       },
     ]
   }
+  const destPath = SKILL_DEST[tool](scope, name)
+  return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'SKILL.md', version)
+}
 
-  if (type === 'agent') {
-    return singleFileInstallCommands(
-      rawUrl, repoUrl, name,
-      `~/Downloads/${name}.md`, 'AGENT.md', version,
-    )
-  }
-
-  if (type === 'mcp') {
+function agentCommands(
+  tool: InstallTool,
+  scope: InstallScope,
+  rawUrl: string,
+  repoUrl: string,
+  name: string,
+  version: string | undefined,
+): InstallCommand[] {
+  if (tool === 'codex') {
     return [
       {
-        title: '設定',
-        command: `# 1. 開啟設定檔內容：\n#    ${rawUrl}\n# 2. 將 mcpServers 內容加入你的 MCP config`,
+        title: '格式不相容（僅供參考）',
+        command: [
+          `# Codex subagent 使用 TOML 格式（.codex/agents/<name>.toml）`,
+          `# AgentKit 的 AGENT.md 為 Markdown 格式，需手動轉換`,
+          `# 原始檔案下載：`,
+          `curl -fsSL ${rawUrl} -o ~/Downloads/${name}.md`,
+        ].join('\n'),
         language: 'shell',
       },
     ]
   }
+  const destPath = tool === 'download'
+    ? `~/Downloads/${name}.md`
+    : AGENT_DEST[tool](scope, name)
+  return singleFileInstallCommands(rawUrl, repoUrl, name, destPath, 'AGENT.md', version)
+}
 
-  if (type === 'plugin') {
+function mcpCommands(tool: InstallTool, rawUrl: string): InstallCommand[] {
+  return [{ title: '設定', command: MCP_HINT[tool](rawUrl), language: 'shell' }]
+}
+
+function pluginCommands(
+  tool: InstallTool,
+  repoUrl: string,
+  repo: string,
+  name: string,
+  version: string | undefined,
+): InstallCommand[] {
+  if (tool === 'download') {
     const sparseDir = version ? `${name}@${version}` : name
     return [
       {
@@ -255,6 +188,39 @@ export function getInstallCommands(
       },
     ]
   }
+  const cli = PLUGIN_CLI[tool]
+  return [
+    {
+      title: 'plugin install',
+      command: [
+        `${cli} plugin marketplace add ${ORG}/${repo}`,
+        `${cli} plugin install ${name}@agentkit-plugins`,
+      ].join('\n'),
+      language: 'shell',
+    },
+  ]
+}
 
-  return []
+// ── Main dispatcher ───────────────────────────────────────
+
+export function getInstallCommands(
+  tool: InstallTool,
+  scope: InstallScope,
+  type: PackageType,
+  name: string,
+  version?: string,
+): InstallCommand[] {
+  const repo = `agentkit-${type}s`
+  const repoUrl = `https://github.com/${ORG}/${repo}`
+  const rawUrl = version
+    ? getRawFileUrlAtTag(type, name, version)
+    : getRawFileUrl(type, name)
+  const scopeFlag = scope === 'global' ? '--scope user' : '--scope project'
+
+  switch (type) {
+    case 'skill':  return skillCommands(tool, scope, rawUrl, repoUrl, name, version, repo, scopeFlag)
+    case 'agent':  return agentCommands(tool, scope, rawUrl, repoUrl, name, version)
+    case 'mcp':    return mcpCommands(tool, rawUrl)
+    case 'plugin': return pluginCommands(tool, repoUrl, repo, name, version)
+  }
 }
